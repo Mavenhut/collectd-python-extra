@@ -27,13 +27,13 @@ try:
   def config_callback(conf):
     for node in conf.children:
       if node.key == 'ConsumerKey':
-        RedisLengthConfig.consumer_key = node.values[0]
+        TwitterStatsConfig.consumer_key = node.values[0]
       elif node.key == 'ConsumerSecret':
-        RedisLengthConfig.consumer_secret = node.values[0]
+        TwitterStatsConfig.consumer_secret = node.values[0]
       elif node.key == 'AccessToken':
-        RedisLengthConfig.access_token = node.values[0]
+        TwitterStatsConfig.access_token = node.values[0]
       elif node.key == 'AccessTokenSecret':
-        RedisLengthConfig.access_token_secret = node.values[0]
+        TwitterStatsConfig.access_token_secret = node.values[0]
       else:
         logger('verb', "unknown config key in puppet module: %s" % node.key)
 
