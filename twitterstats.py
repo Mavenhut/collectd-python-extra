@@ -22,7 +22,7 @@ try:
     consumer_key = "key"
     consumer_secret = "secret"
     access_token = "token"
-    consumer_key = "token secret"
+    access_token_secret = "token secret"
 
   def config_callback(conf):
     for node in conf.children:
