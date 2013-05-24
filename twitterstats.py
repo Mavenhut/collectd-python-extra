@@ -19,10 +19,10 @@ try:
   NAME = "twitterstats"
 
   class TwitterStatsConfig:
-    TwitterStatsConfig.consumer_key = "key"
-    TwitterStatsConfig.consumer_secret = "secret"
-    TwitterStatsConfig.access_token = "token"
-    TwitterStatsConfig.consumer_key = "token secret"
+    consumer_key = "key"
+    consumer_secret = "secret"
+    access_token = "token"
+    consumer_key = "token secret"
 
   def config_callback(conf):
     for node in conf.children:
