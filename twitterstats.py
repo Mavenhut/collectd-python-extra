@@ -17,6 +17,7 @@ try:
   import collectd
 
   NAME = "twitterstats"
+  VERBOSE_LOGGING = False
 
   class TwitterStatsConfig:
     consumer_key = "key"
@@ -25,32 +26,46 @@ try:
     access_token_secret = "token secret"
 
   def config_callback(conf):
+    logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
+    TSConfig = TwitterStatsConfig()
     for node in conf.children:
       if node.key == 'ConsumerKey':
-        TwitterStatsConfig.consumer_key = node.values[0]
+        TSConfig.consumer_key = node.values[0]
       elif node.key == 'ConsumerSecret':
-        TwitterStatsConfig.consumer_secret = node.values[0]
+        TSConfig.consumer_secret = node.values[0]
       elif node.key == 'AccessToken':
-        TwitterStatsConfig.access_token = node.values[0]
+        TSConfig.access_token = node.values[0]
       elif node.key == 'AccessTokenSecret':
-        TwitterStatsConfig.access_token_secret = node.values[0]
+        TSConfig.access_token_secret = node.values[0]
       else:
-        logger('verb', "unknown config key in puppet module: %s" % node.key)
+        logger('warn', "unknown config key in puppet module: %s" % node.key)
 
   def read_callback():
-
-    twitter_stats = check_twitter_stats(consumer_key=TwitterStatsConfig.consumer_key,
-                                   consumer_secret=TwitterStatsConfig.consumer_secret,
-                                   access_token=TwitterStatsConfig.access_token,
-                                   access_token_secret=TwitterStatsConfig.access_token_secret)
-    val = collectd.Values(plugin=NAME, type="counter")
+    logger('verb', "TwitterStatsConfig.consumer_key: %s" % TwitterStatsConfig.consumer_key)
+    twitter_stats = check_twitter_stats(TwitterStatsConfig.consumer_key,
+                                   TwitterStatsConfig.consumer_secret,
+                                   TwitterStatsConfig.access_token,
+                                   TwitterStatsConfig.access_token_secret)
+    val = collectd.Values(plugin=NAME, type="gauge")
     val.plugin_instance = twitter_stats['name']
     val.values = [twitter_stats['followers'] ]
-    val.type = "counter"
+    val.type = "gauge"
     val.dispatch()
 
-  collectd.register_read(read_callback)
+  # logging function
+  def logger(t, msg):
+    if t == 'err':
+        collectd.error('%s: %s' % (NAME, msg))
+    elif t == 'warn':
+        collectd.warning('%s: %s' % (NAME, msg))
+    elif t == 'verb':
+        if VERBOSE_LOGGING:
+            collectd.info('%s: %s' % (NAME, msg))
+    else:
+        collectd.notice('%s: %s' % (NAME, msg))
+
   collectd.register_config(config_callback)
+  collectd.register_read(read_callback)
     
 
 except ImportError:
