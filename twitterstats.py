@@ -27,16 +27,15 @@ try:
 
   def config_callback(conf):
     logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
-    TSConfig = TwitterStatsConfig()
     for node in conf.children:
       if node.key == 'ConsumerKey':
-        TSConfig.consumer_key = node.values[0]
+        TwitterStatsConfig.consumer_key = node.values[0]
       elif node.key == 'ConsumerSecret':
-        TSConfig.consumer_secret = node.values[0]
+        TwitterStatsConfig.consumer_secret = node.values[0]
       elif node.key == 'AccessToken':
-        TSConfig.access_token = node.values[0]
+        TwitterStatsConfig.access_token = node.values[0]
       elif node.key == 'AccessTokenSecret':
-        TSConfig.access_token_secret = node.values[0]
+        TwitterStatsConfig.access_token_secret = node.values[0]
       else:
         logger('warn', "unknown config key in puppet module: %s" % node.key)
 
