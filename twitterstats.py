@@ -19,32 +19,33 @@ try:
   NAME = "twitterstats"
   VERBOSE_LOGGING = False
 
-  class TwitterStatsConfig:
-    consumer_key = "key"
-    consumer_secret = "secret"
-    access_token = "token"
-    access_token_secret = "token secret"
+  global  consumer_key, consumer_secret, access_token, access_token_secret
+  consumer_key = ""
+  consumer_secret = ""
+  access_token = ""
+  access_token_secret = ""
 
   def config_callback(conf):
     logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
     for node in conf.children:
       if node.key == 'ConsumerKey':
-        TwitterStatsConfig.consumer_key = node.values[0]
+        consumer_key = node.values[0]
       elif node.key == 'ConsumerSecret':
-        TwitterStatsConfig.consumer_secret = node.values[0]
+        consumer_secret = node.values[0]
       elif node.key == 'AccessToken':
-        TwitterStatsConfig.access_token = node.values[0]
+        access_token = node.values[0]
       elif node.key == 'AccessTokenSecret':
-        TwitterStatsConfig.access_token_secret = node.values[0]
+        access_token_secret = node.values[0]
       else:
         logger('warn', "unknown config key in puppet module: %s" % node.key)
-
+  
   def read_callback():
-    logger('verb', "TwitterStatsConfig.consumer_key: %s" % TwitterStatsConfig.consumer_key)
-    twitter_stats = check_twitter_stats(TwitterStatsConfig.consumer_key,
-                                   TwitterStatsConfig.consumer_secret,
-                                   TwitterStatsConfig.access_token,
-                                   TwitterStatsConfig.access_token_secret)
+    logger('verb', "consumer_key: %s" % consumer_key)
+    twitter_stats = check_twitter_stats(consumer_key,
+                                   consumer_secret,
+                                   access_token,
+                                   access_token_secret
+                                   )
     val = collectd.Values(plugin=NAME, type="gauge")
     val.plugin_instance = twitter_stats['name']
     val.values = [twitter_stats['followers'] ]
@@ -73,10 +74,10 @@ except ImportError:
   pass
 
 if __name__ == "__main__":
-  consumer_key = sys.argv[1]
-  consumer_secret = sys.argv[2]
-  access_token = sys.argv[3]
-  access_token_secret= sys.argv[4]
-  stats = check_twitter_stats(consumer_key, consumer_secret, access_token, access_token_secret)
+  consumer_Key = sys.argv[1]
+  consumer_Secret = sys.argv[2]
+  access_Token = sys.argv[3]
+  access_Token_Secret= sys.argv[4]
+  stats = check_twitter_stats(consumer_Key, consumer_Secret, access_Token, access_Token_Secret)
 
   print "Twitter followers count of %s: %s" % (stats['name'], stats['followers'])
