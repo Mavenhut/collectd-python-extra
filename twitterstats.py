@@ -15,11 +15,11 @@ def check_twitter_stats(consumer_key,consumer_secret,access_token,access_token_s
 
 try:
   import collectd
-
+  global  consumer_key, consumer_secret, access_token, access_token_secret, VERBOSE_LOGGING
+  
   NAME = "twitterstats"
   VERBOSE_LOGGING = False
-
-  global  consumer_key, consumer_secret, access_token, access_token_secret
+  
   consumer_key = ""
   consumer_secret = ""
   access_token = ""
@@ -49,6 +49,7 @@ try:
     val = collectd.Values(plugin=NAME, type="gauge")
     val.plugin_instance = twitter_stats['name']
     val.values = [twitter_stats['followers'] ]
+    val.type_instance = "followers"
     val.type = "gauge"
     val.dispatch()
 
