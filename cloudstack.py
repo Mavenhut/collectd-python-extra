@@ -124,7 +124,7 @@ def get_stats():
         	stats[metricnameMemUsed] = h['memoryused'] 
         	stats[metricnameMemTotal] = h['memorytotal'] 
         	stats[metricnameMemAlloc] = h['memoryallocated'] 
-        	if h['islocalstorageactive']:
+        	if h['islocalstorageactive'] == "true":
 			stats[metricnameDiskAlloc] = h['disksizeallocated'] 
         		stats[metricnameDiskTotal] = h['disksizetotal'] 
   		logger('verb', "readings :  %s memory used %s " % (h['name'], h['memoryused']))
@@ -138,7 +138,7 @@ def get_stats():
      	logger('warn', "status err Unable to connect to CloudStack URL at %s for SystemVms" % API_MONITORS)
 
   for systemvm in systemvms:
-	metricnameSessions = METRIC_DELIM.join([ systemvm['name'].lower(), h['podid'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'activeviewersessions' ])
+	metricnameSessions = METRIC_DELIM.join([ 'activeviewersessions', systemvm['zonename'].lower(), systemvm['name'].lower(), 'activeviewersessions' ])
 	if 'activeviewersessions' in systemvm:
 		stats[metricnameSessions] = systemvm['activeviewersessions']
   
