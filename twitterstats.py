@@ -36,6 +36,8 @@ try:
         access_token = node.values[0]
       elif node.key == 'AccessTokenSecret':
         access_token_secret = node.values[0]
+      elif node.key == "Verbose":
+        VERBOSE_LOGGING = bool(node.values[0])
       else:
         logger('warn', "unknown config key in puppet module: %s" % node.key)
   
