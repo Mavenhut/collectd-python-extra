@@ -3,9 +3,9 @@ import tweepy
 import sys
 import os
 
-def check_twitter_stats(consumer_key,consumer_secret,access_token,access_token_secret):
-  auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-  auth.set_access_token(access_token, access_token_secret)
+def check_twitter_stats(key,secret,token,token_secret):
+  auth = tweepy.OAuthHandler(key, secret)
+  auth.set_access_token(token, token_secret)
 
   api = tweepy.API(auth)
   twitterStats = {} 
@@ -26,15 +26,15 @@ try:
   access_token_secret = ""
 
   def config_callback(conf):
-    logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
     for node in conf.children:
-      if node.key == 'ConsumerKey':
+      logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
+      if node.key == "ConsumerKey":
         consumer_key = node.values[0]
-      elif node.key == 'ConsumerSecret':
+      elif node.key == "ConsumerSecret":
         consumer_secret = node.values[0]
-      elif node.key == 'AccessToken':
+      elif node.key == "AccessToken":
         access_token = node.values[0]
-      elif node.key == 'AccessTokenSecret':
+      elif node.key == "AccessTokenSecret":
         access_token_secret = node.values[0]
       elif node.key == "Verbose":
         VERBOSE_LOGGING = bool(node.values[0])
@@ -51,6 +51,7 @@ try:
     val = collectd.Values(plugin=NAME, type="gauge")
     val.plugin_instance = twitter_stats['name']
     val.values = [twitter_stats['followers'] ]
+    logger('verb', "followers count: %s" % twitter_stats['followers'])
     val.type_instance = "followers"
     val.type = "gauge"
     val.dispatch()
