@@ -3,18 +3,31 @@ import redis
 import sys
 import os
 
-def check_redis_length(queue_name, port=6379):
+def check_redis_length(queue_name, port=6380):
   redis_client = redis.Redis(port=port)
   return redis_client.llen(queue_name)
+
+class RedisLengthConfig:
+  queue_name = "logstash"
+  port = 6380
 
 try:
   import collectd
 
+
+  def logger(t, msg):
+    if t == 'err':
+        collectd.error('%s: %s' % (NAME, msg))
+    elif t == 'warn':
+        collectd.warning('%s: %s' % (NAME, msg))
+    elif t == 'verb':
+        if VERBOSE_LOGGING:
+            collectd.info('%s: %s' % (NAME, msg))
+    else:
+        collectd.notice('%s: %s' % (NAME, msg))
+
   NAME = "redislen"
 
-  class RedisLengthConfig:
-    queue_name = "logstash"
-    port = 6379
 
   def config_callback(conf):
     for node in conf.children:
@@ -35,9 +48,8 @@ try:
     val.type = "gauge"
     val.dispatch()
 
-  collectd.register_read(read_callback)
   collectd.register_config(config_callback)
-    
+  collectd.register_read(read_callback)
 
 except ImportError:
   ## we're not running inside collectd
@@ -45,7 +57,7 @@ except ImportError:
   pass
 
 if __name__ == "__main__":
-  port = int(os.getenv("REDIS_PORT", 6379))
+  port = int(os.getenv("REDIS_PORT", 6380))
   queue_name = sys.argv[1]
   queue_len = check_redis_length(queue_name, port=port)
 
