@@ -8,8 +8,11 @@ def check_redis_length(queue_name, port=6380):
   return redis_client.llen(queue_name)
 
 class RedisLengthConfig:
-  queue_name = "logstash"
-  port = 6380
+  def __init__(self):
+    self.queue_name = "logstash"
+    self.port = 6380
+
+config = RedisLengthConfig()
 
 try:
   import collectd
@@ -17,14 +20,13 @@ try:
 
   def logger(t, msg):
     if t == 'err':
-        collectd.error('%s: %s' % (NAME, msg))
+      collectd.error('%s: %s' % (NAME, msg))
     elif t == 'warn':
-        collectd.warning('%s: %s' % (NAME, msg))
-    elif t == 'verb':
-        if VERBOSE_LOGGING:
-            collectd.info('%s: %s' % (NAME, msg))
+      collectd.warning('%s: %s' % (NAME, msg))
+    elif t == 'info':
+      collectd.info('%s: %s' % (NAME, msg))
     else:
-        collectd.notice('%s: %s' % (NAME, msg))
+      collectd.notice('%s: %s' % (NAME, msg))
 
   NAME = "redislen"
 
@@ -32,18 +34,18 @@ try:
   def config_callback(conf):
     for node in conf.children:
       if node.key == 'QueueName':
-        RedisLengthConfig.queue_name = node.values[0]
+        config.queue_name = node.values[0]
       elif node.key == 'Port':
-        RedisLengthConfig.port = int(node.values[0])
+        config.port = int(node.values[0])
       else:
-        logger('verb', "unknown config key in puppet module: %s" % node.key)
+        logger('info', "unknown config key in puppet module: %s" % node.key)
 
   def read_callback():
 
-    queue_len = check_redis_length(RedisLengthConfig.queue_name,
-                                   port=RedisLengthConfig.port)
+    queue_len = check_redis_length(config.queue_name,
+                                   port=config.port)
     val = collectd.Values(plugin=NAME, type="gauge")
-    val.plugin_instance = RedisLengthConfig.queue_name
+    val.plugin_instance = config.queue_name
     val.values = [ float(queue_len) ]
     val.type = "gauge"
     val.dispatch()
