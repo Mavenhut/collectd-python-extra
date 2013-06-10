@@ -94,6 +94,10 @@ METRIC_TYPES = {
   'memorytotal': ('h_memory_total', 'memory'),
   'memoryallocated': ('h_memory_allocated', 'memory'),
   'activeviewersessions': ('console_active_sessions', 'current'),
+  'hostscount': ('hosts_count', 'current'),
+  'zonescount': ('zones_count', 'current'),
+  'zonepublicipallocated': ('z_public_ip_allocated', 'current'),
+  'zonepubliciptotal': ('z_public_ip_total', 'current'),
   'disksizeallocated': ('h_disk_allocated', 'bytes'),
   'disksizetotal': ('h_disk_total', 'bytes')
   
@@ -124,12 +128,14 @@ def get_stats():
         	stats[metricnameMemUsed] = h['memoryused'] 
         	stats[metricnameMemTotal] = h['memorytotal'] 
         	stats[metricnameMemAlloc] = h['memoryallocated'] 
-        	if h['islocalstorageactive'] == "true":
+        	if h['islocalstorageactive'] == "True":
 			stats[metricnameDiskAlloc] = h['disksizeallocated'] 
         		stats[metricnameDiskTotal] = h['disksizetotal'] 
   		logger('verb', "readings :  %s memory used %s " % (h['name'], h['memoryused']))
 	except (TypeError, ValueError), e:
         	pass
+
+  # collect number of active console sessions
   try:
 	systemvms = cloudstack.listSystemVms({
 		'systemvmtype': 'consoleproxy'
@@ -141,7 +147,26 @@ def get_stats():
 	metricnameSessions = METRIC_DELIM.join([ 'activeviewersessions', systemvm['zonename'].lower(), systemvm['name'].lower(), 'activeviewersessions' ])
 	if 'activeviewersessions' in systemvm:
 		stats[metricnameSessions] = systemvm['activeviewersessions']
-  
+
+  # collect number of zones and available public ips 
+  try:
+        zones = cloudstack.listZones({
+                'showcapacities': 'true'
+                })
+  except:
+        logger('warn', "status err Unable to connect to CloudStack URL at %s for SystemVms" % API_MONITORS)
+
+  for zone in zones:
+        metricnameIpAllocated = METRIC_DELIM.join([ 'zones', zone['name'].lower(),  'zonepublicipallocated' ])
+        metricnameIpTotal = METRIC_DELIM.join([ 'zones', zone['name'].lower(),  'zonepubliciptotal' ])
+        for capcity in zone['capacity']:
+            if capacity['type'] == '4':
+                 stats[metricnameIpTotal] = capacity['capacitytotal']
+                 stats[metricnameIpAllocated] = capacity['capacityused']
+
+  metricnameZonesCount = METRIC_DELIM.join([ 'zones', 'count' ])
+  stats[metricnameZonesCount] = zone['count']
+ 
   try:
         capacities = cloudstack.listCapacity({
                 })  
