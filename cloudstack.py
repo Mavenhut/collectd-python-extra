@@ -81,6 +81,10 @@ class Client(BaseClient):
         def listSystemVms(self, args={}):
         	return self.request('listSystemVms', args)
         
+        def listZones(self, args={}):
+        	return self.request('listZones', args)
+        
+        
 NAME = 'cloudstack'
 
 DEFAULT_API = 'http://localhost:8096/client/api'
