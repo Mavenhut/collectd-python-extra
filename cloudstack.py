@@ -163,13 +163,13 @@ def get_stats():
   for zone in zones:
         metricnameIpAllocated = METRIC_DELIM.join([ 'zones', zone['name'].lower(),  'zonepublicipallocated' ])
         metricnameIpTotal = METRIC_DELIM.join([ 'zones', zone['name'].lower(),  'zonepubliciptotal' ])
-        for capcity in zone['capacity']:
+        for capacity in zone['capacity']:
             if capacity['type'] == '4':
                  stats[metricnameIpTotal] = capacity['capacitytotal']
                  stats[metricnameIpAllocated] = capacity['capacityused']
 
   metricnameZonesCount = METRIC_DELIM.join([ 'zones', 'count' ])
-  stats[metricnameZonesCount] = zone['count']
+  stats[metricnameZonesCount] = zones['count']
  
   try:
         capacities = cloudstack.listCapacity({
