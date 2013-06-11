@@ -161,14 +161,14 @@ def get_stats():
         logger('warn', "status err Unable to connect to CloudStack URL at %s for SystemVms" % API_MONITORS)
 
   for zone in zones:
-        metricnameIpAllocated = METRIC_DELIM.join([ 'zones', zone['name'].lower(),  'zonepublicipallocated' ])
-        metricnameIpTotal = METRIC_DELIM.join([ 'zones', zone['name'].lower(),  'zonepubliciptotal' ])
+        metricnameIpAllocated = METRIC_DELIM.join([ 'zonepublicipallocated', zone['name'].lower(),  'zonepublicipallocated' ])
+        metricnameIpTotal = METRIC_DELIM.join([ 'zonepubliciptotal', zone['name'].lower(),  'zonepubliciptotal' ])
         for capacity in zone['capacity']:
             if capacity['type'] == '4':
                  stats[metricnameIpTotal] = capacity['capacitytotal']
                  stats[metricnameIpAllocated] = capacity['capacityused']
 
-  metricnameZonesCount = METRIC_DELIM.join([ 'zones', 'count' ])
+  metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'count' ])
   stats[metricnameZonesCount] = len(zones)
  
   try:

@@ -4,14 +4,17 @@ import sys
 import os
 
 def check_twitter_stats(key,secret,token,token_secret):
-  auth = tweepy.OAuthHandler(key, secret)
-  auth.set_access_token(token, token_secret)
+  if not (key and secret and token and token_secret)
+    logger('error', "empty parameter, key: %s , secret: %s , token: %s , token_secret: %s" % (key, secret, token, token_secret)
+  else
+    auth = tweepy.OAuthHandler(key, secret)
+    auth.set_access_token(token, token_secret)
 
-  api = tweepy.API(auth)
-  twitterStats = {} 
-  twitterStats['name'] = api.me().name
-  twitterStats['followers'] = api.me().followers_count
-  return twitterStats
+    api = tweepy.API(auth)
+    twitterStats = {} 
+    twitterStats['name'] = api.me().name
+    twitterStats['followers'] = api.me().followers_count
+    return twitterStats
 
 try:
   import collectd
