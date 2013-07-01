@@ -6,23 +6,23 @@ from urllib2 import HTTPError,Request,urlopen,URLError
 from urllib import urlencode
 from simplejson import load
 
-def check_twitter_stats(key,secret,token,token_secret):
-  if not (key and secret and token and token_secret)
+def check_twitter_stats(key,secret,token,token_secret,u_id):
+  if not (key and secret and token and token_secret and (u_id > 0)):
     logger('error', "empty parameter, key: %s , secret: %s , token: %s , token_secret: %s" % (key, secret, token, token_secret))
-  else
+  else:
     auth = tweepy.OAuthHandler(key, secret)
     auth.set_access_token(token, token_secret)
 
     api = tweepy.API(auth)
     twitterStats = {} 
-    twitterStats['name'] = "exoscale"
-    twitterStats['followers'] = api.get_user(screen_name='exoscale').followers_count
+    twitterStats['name'] = api.get_user(user_id=u_id).name
+    twitterStats['followers'] = api.get_user(user_id=u_id).followers_count
     return twitterStats
 
 def check_twitter_counter(u_id,twcounterkey):
-  if not (u_id == 0: and twcounterkey) 
+  if not ((u_id > 0) and twcounterkey): 
     logger('error', "empty parameter,ID: %s , KEY: %s " % (u_id,twcounterkey))
-  data = load(urlopen((self.TC_URL +'?'+urlencode({
+  data = load(urlopen(('http://api.twittercounter.com/?'+urlencode({
             'apikey':twcounterkey,
             'twitter_id':u_id
         }))))
@@ -32,7 +32,7 @@ def check_twitter_counter(u_id,twcounterkey):
 
 try:
   import collectd
-  global  consumer_key, consumer_secret, access_token, access_token_secret, VERBOSE_LOGGING
+  global  consumer_key, consumer_secret, access_token, access_token_secret, u_id, VERBOSE_LOGGING
   
   NAME = "twitterstats"
   VERBOSE_LOGGING = False
@@ -41,6 +41,7 @@ try:
   consumer_secret = ""
   access_token = ""
   access_token_secret = ""
+  u_id = ""
 
   def config_callback(conf):
     for node in conf.children:
@@ -53,6 +54,8 @@ try:
         access_token = node.values[0]
       elif node.key == "AccessTokenSecret":
         access_token_secret = node.values[0]
+      elif node.key == "TwitterID":
+        u_id = node.values[0]
       elif node.key == "Verbose":
         VERBOSE_LOGGING = bool(node.values[0])
       else:
@@ -63,7 +66,8 @@ try:
     twitter_stats = check_twitter_stats(consumer_key,
                                    consumer_secret,
                                    access_token,
-                                   access_token_secret
+                                   access_token_secret,
+                                   u_id
                                    )
     val = collectd.Values(plugin=NAME, type="gauge")
     val.plugin_instance = twitter_stats['name']
@@ -99,6 +103,7 @@ if __name__ == "__main__":
   consumer_Secret = sys.argv[2]
   access_Token = sys.argv[3]
   access_Token_Secret= sys.argv[4]
-  stats = check_twitter_stats(consumer_Key, consumer_Secret, access_Token, access_Token_Secret)
+  u_ID = sys.argv[5]
+  stats = check_twitter_stats(consumer_Key, consumer_Secret, access_Token, access_Token_Secret, u_ID)
 
   print "Twitter followers count of %s: %s" % (stats['name'], stats['followers'])
