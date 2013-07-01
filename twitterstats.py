@@ -2,19 +2,33 @@
 import tweepy
 import sys
 import os
+from urllib2 import HTTPError,Request,urlopen,URLError
+from urllib import urlencode
+from simplejson import load
 
 def check_twitter_stats(key,secret,token,token_secret):
   if not (key and secret and token and token_secret)
-    logger('error', "empty parameter, key: %s , secret: %s , token: %s , token_secret: %s" % (key, secret, token, token_secret)
+    logger('error', "empty parameter, key: %s , secret: %s , token: %s , token_secret: %s" % (key, secret, token, token_secret))
   else
     auth = tweepy.OAuthHandler(key, secret)
     auth.set_access_token(token, token_secret)
 
     api = tweepy.API(auth)
     twitterStats = {} 
-    twitterStats['name'] = api.me().name
-    twitterStats['followers'] = api.me().followers_count
+    twitterStats['name'] = "exoscale"
+    twitterStats['followers'] = api.get_user(screen_name='exoscale').followers_count
     return twitterStats
+
+def check_twitter_counter(u_id,twcounterkey):
+  if not (u_id == 0: and twcounterkey) 
+    logger('error', "empty parameter,ID: %s , KEY: %s " % (u_id,twcounterkey))
+  data = load(urlopen((self.TC_URL +'?'+urlencode({
+            'apikey':twcounterkey,
+            'twitter_id':u_id
+        }))))
+  if 'Error' in data:
+    logger('error', "Error in Accessing TwitterCounter API: %s" % (data['Error']))
+  return data
 
 try:
   import collectd
