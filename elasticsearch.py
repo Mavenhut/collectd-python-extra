@@ -123,15 +123,18 @@ def check_es_cluster(instance="localhost", cluster='http://localhost:9200'):
   url_stats = "%s/_cluster/nodes/_local/stats?http=true&jvm=true&process=true&transport=true" % cluster
   url_health = "%s/_cluster/health" % cluster
 
-  stats = requests.get(url_stats).json()
-  health = requests.get(url_health).json()
+  
+  stats = requests.get(url_stats)
+  health = requests.get(url_health)
+  statsjson = json.loads(stats.content)
+  healthjson = json.loads(health.content)
 
 
   metric_tab = []
 
   for name, metric_hints in HEALTH_METRICS.items():
 
-    datapoint = health[name]
+    datapoint = healthjson[name]
 
     if 'transform' in metric_hints:
       transform_function = metric_hints['transform']
@@ -143,7 +146,7 @@ def check_es_cluster(instance="localhost", cluster='http://localhost:9200'):
 
   for metric_hints in STATS_METRICS:
     name = name_from_path(metric_hints['path'])
-    datapoint = deep_lookup(stats, metric_hints['path'])
+    datapoint = deep_lookup(statsjson, metric_hints['path'])
 
     if 'transform' in metric_hints:
       transform_function = metric_hints['transform']
