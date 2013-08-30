@@ -3,14 +3,14 @@ import redis
 import sys
 import os
 
-def check_redis_length(queue_name, port=6380):
+def check_redis_length(queue_name, port=6379):
   redis_client = redis.Redis(port=port)
   return redis_client.llen(queue_name)
 
 class RedisLengthConfig:
   def __init__(self):
     self.queue_name = "logstash"
-    self.port = 6380
+    self.port = 6379
 
 config = RedisLengthConfig()
 
@@ -59,7 +59,7 @@ except ImportError:
   pass
 
 if __name__ == "__main__":
-  port = int(os.getenv("REDIS_PORT", 6380))
+  port = int(os.getenv("REDIS_PORT", 6379))
   queue_name = sys.argv[1]
   queue_len = check_redis_length(queue_name, port=port)
 
