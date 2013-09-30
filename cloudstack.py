@@ -102,6 +102,7 @@ METRIC_TYPES = {
   'zonescount': ('zones_count', 'current'),
   'zonepublicipallocated': ('z_public_ip_allocated', 'current'),
   'zonepubliciptotal': ('z_public_ip_total', 'current'),
+  'zonepublicippercent': ('z_public_ip_percent', 'percent'),
   'disksizeallocated': ('h_disk_allocated', 'bytes'),
   'disksizetotal': ('h_disk_total', 'bytes')
   
@@ -163,10 +164,12 @@ def get_stats():
   for zone in zones:
         metricnameIpAllocated = METRIC_DELIM.join([ 'zonepublicipallocated', zone['name'].lower(),  'zonepublicipallocated' ])
         metricnameIpTotal = METRIC_DELIM.join([ 'zonepubliciptotal', zone['name'].lower(),  'zonepubliciptotal' ])
+        metricnameIpAllocatedPercent = METRIC_DELIM.join([ 'zonepublicippercent', zone['name'].lower(),  'zonepublicippercent' ])
         for capacity in zone['capacity']:
-            if capacity['type'] == '4':
-                 stats[metricnameIpTotal] = capacity['capacitytotal']
-                 stats[metricnameIpAllocated] = capacity['capacityused']
+            if capacity['type'] == 8:
+                stats[metricnameIpTotal] = capacity['capacitytotal']
+                stats[metricnameIpAllocated] = capacity['capacityused']
+                stats[metricnameIpAllocatedPercent] = capacity['percentused']
 
   metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'count' ])
   stats[metricnameZonesCount] = len(zones)
