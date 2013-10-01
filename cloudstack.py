@@ -107,7 +107,11 @@ METRIC_TYPES = {
   'zonepublicipallocated': ('z_public_ip_allocated', 'current'),
   'zonepubliciptotal': ('z_public_ip_total', 'current'),
   'zonepublicippercent': ('z_public_ip_percent', 'percent'),
-  'disksizeallocated': ('h_disk_allocated', 'bytes'),
+  'zonevmtotal': ('z_vm_total', 'current'),
+  'zonevmtotalrunning': ('z_vm_total_running', 'current'),
+  'zonevmtotalstopped': ('z_vm_total_stopped', 'current'),
+  'zonevmtotalstarting': ('z_vm_total_starting', 'current'),
+  'zonevmtotalstopping': ('z_vm_total_stopping', 'current'),
   'disksizetotal': ('h_disk_total', 'bytes')
   
 }
