@@ -105,7 +105,7 @@ METRIC_TYPES = {
   'memoryallocated': ('h_memory_allocated', 'memory'),
   'cpuallocated': ('h_cpu_allocated', 'percent'),
   'activeviewersessions': ('console_active_sessions', 'current'),
-  'hostscount': ('hosts_count', 'current'),
+  'zonehosttotal': ('hosts_count', 'current'),
   'zonescount': ('zones_count', 'current'),
   'zonepublicipallocated': ('z_public_ip_allocated', 'current'),
   'zonepubliciptotal': ('z_public_ip_total', 'current'),
@@ -186,6 +186,7 @@ def get_stats():
         metricnameVmZoneTotal = METRIC_DELIM.join([ 'zonevmtotal', zone['name'].lower(),  'zonevmtotal' ])
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
+        metricnameHostZoneTotal = METRIC_DELIM.join([ 'zonehosttotal', zone['name'].lower(),  'zonehosttotal' ])
 
 
         # collect number of virtual machines 
@@ -225,7 +226,9 @@ def get_stats():
                 stats[metricnameIpAllocated] = capacity['capacityused']
                 stats[metricnameIpAllocatedPercent] = capacity['percentused']
 
-  stats[metricnameZonesCount] = len(zones) 
+  stats[metricnameZonesCount] = len(zones)
+  stats[metricnameHostZoneTotal] = len(hypervisors)
+ 
 
   # collect accounts
   try:
