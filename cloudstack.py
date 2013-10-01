@@ -83,6 +83,10 @@ class Client(BaseClient):
         
         def listZones(self, args={}):
         	return self.request('listZones', args)
+
+        def listVirtualMachines(self, args={}):
+                return self.request('listVirtualMachines', args)
+
         
         
 NAME = 'cloudstack'
