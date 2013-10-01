@@ -87,6 +87,8 @@ class Client(BaseClient):
         def listVirtualMachines(self, args={}):
                 return self.request('listVirtualMachines', args)
 
+        def listAccounts(self, args={}):
+                            return self.request('listAccounts', args)
         
         
 NAME = 'cloudstack'
@@ -112,8 +114,11 @@ METRIC_TYPES = {
   'zonevmtotalstopped': ('z_vm_total_stopped', 'current'),
   'zonevmtotalstarting': ('z_vm_total_starting', 'current'),
   'zonevmtotalstopping': ('z_vm_total_stopping', 'current'),
-  'disksizetotal': ('h_disk_total', 'bytes')
-  
+  'disksizetotal': ('h_disk_total', 'bytes'),
+  'accountscount': ('g_accounts_total', 'current'),
+  'accountenabled': ('g_accounts_total_enabled', 'current'),
+  'accountdisabled': ('g_accounts_total_disabled', 'current')
+ 
 }
 
 METRIC_DELIM = '.'
@@ -178,6 +183,10 @@ def get_stats():
         metricnameVmZoneTotalStarting = METRIC_DELIM.join([ 'zonevmtotalstarting', zone['name'].lower(),  'zonevmtotalstarting' ])
         metricnameVmZoneTotal = METRIC_DELIM.join([ 'zonevmtotal', zone['name'].lower(),  'zonevmtotal' ])
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
+        metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
+        metricnameAccountsTotal = METRIC_DELIM.join([ 'accounts',  'accountscount' ])
+        metricnameAccountsTotalEnabled = METRIC_DELIM.join([ 'accounts',  'accountenabled' ])
+        metricnameAccountsTotalDisabled = METRIC_DELIM.join([ 'accounts',  'accountdisabled' ])
 
 
         # collect number of virtual machines 
@@ -219,6 +228,26 @@ def get_stats():
 
   stats[metricnameZonesCount] = len(zones) 
 
+  # collect accounts
+  try:
+        accounts = cloudstack.listAccounts({
+                'listall': 'true'
+                })
+  except:
+      print("status err Unable to connect to CloudStack URL at %s for ListAccounts")
+
+  accountsEnabledCount = 0
+  accountsDisabledCount = 0
+
+  for account in accounts:
+        if account['state'] == 'enabled':
+                accountsEnabledCount = accountsEnabledCount + 1
+        elif account['state'] == 'disabled':
+                accountsDisabledCount = accountsDisabledCount + 1
+
+  stats[metricnameAccountsTotal] = len(accounts)
+  stats[metricnameAccountsTotalEnabled] = accountsEnabledCount
+  stats[metricnameAccountsTotalDisabled] = accountsDisabledCount
 
   
   return stats	
