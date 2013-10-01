@@ -149,8 +149,9 @@ def get_stats():
         	stats[metricnameMemUsed] = h['memoryused'] 
         	stats[metricnameMemTotal] = h['memorytotal'] 
         	stats[metricnameMemAlloc] = h['memoryallocated']
-                stats[metricnameCpuAlloc] = h['cpuallocated'] 
-  		logger('verb', "readings :  %s memory used %s " % (h['name'], h['memoryused']))
+  		cpuallocated = h['cpuallocated'].replace("%", "")
+                stats[metricnameCpuAlloc] = cpuallocated
+                logger('verb', "readings :  %s memory used %s " % (h['name'], h['memoryused']))
 	except (TypeError, ValueError), e:
         	pass
 
