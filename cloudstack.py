@@ -187,7 +187,6 @@ def get_stats():
         virtualMachineZoneStoppingCount = 0
 
         for virtualmachine in virtualmachines:
-
             if virtualmachine['state'] == 'Running':
                 virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
             elif virtualmachine['state'] == 'Stopped':
