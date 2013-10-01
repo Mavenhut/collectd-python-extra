@@ -153,36 +153,68 @@ def get_stats():
 	if 'activeviewersessions' in systemvm:
 		stats[metricnameSessions] = systemvm['activeviewersessions']
 
-  # collect number of zones and available public ips 
+  # collect number of zones, available public ips and VMs
   try:
         zones = cloudstack.listZones({
                 'showcapacities': 'true'
                 })
   except:
-        logger('warn', "status err Unable to connect to CloudStack URL at %s for SystemVms" % API_MONITORS)
-
+      logger('warn', "status err Unable to connect to CloudStack URL at %s for ListZone" % API_MONITORS)
   for zone in zones:
         metricnameIpAllocated = METRIC_DELIM.join([ 'zonepublicipallocated', zone['name'].lower(),  'zonepublicipallocated' ])
         metricnameIpTotal = METRIC_DELIM.join([ 'zonepubliciptotal', zone['name'].lower(),  'zonepubliciptotal' ])
         metricnameIpAllocatedPercent = METRIC_DELIM.join([ 'zonepublicippercent', zone['name'].lower(),  'zonepublicippercent' ])
+        metricnameVmZoneTotalRunning = METRIC_DELIM.join([ 'zonevmtotalrunning', zone['name'].lower(),  'zonevmtotalrunning' ])
+        metricnameVmZoneTotalStopped = METRIC_DELIM.join([ 'zonevmtotalstopped', zone['name'].lower(),  'zonevmtotalstopped' ])
+        metricnameVmZoneTotalStopping = METRIC_DELIM.join([ 'zonevmtotalstopping', zone['name'].lower(),  'zonevmtotalstopping' ])
+        metricnameVmZoneTotalStarting = METRIC_DELIM.join([ 'zonevmtotalstarting', zone['name'].lower(),  'zonevmtotalstarting' ])
+        metricnameVmZoneTotal = METRIC_DELIM.join([ 'zonevmtotal', zone['name'].lower(),  'zonevmtotal' ])
+        metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'count' ])
+
+
+        # collect number of virtual machines 
+        try:
+            virtualmachines = cloudstack.listVirtualMachines({
+                'listall': 'true',
+                'details': 'all'
+                })
+        except:
+            logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVms" % API_MONITORS)
+
+        virtualMachineZoneRunningCount = 0
+        virtualMachineZoneStoppedCount = 0
+        virtualMachineZoneStartingCount = 0
+        virtualMachineZoneStoppingCount = 0
+
+        for virtualmachine in virtualmachines:
+
+            if virtualmachine['state'] == 'Running':
+                virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
+            elif virtualmachine['state'] == 'Stopped':
+                virtualMachineZoneStoppedCount = virtualMachineZoneStoppedCount + 1
+            elif virtualmachine['state'] == 'Stopping':
+                virtualMachineZoneStartingCount = virtualMachineZoneStartingCount + 1
+            elif virtualmachine['state'] == 'Starting':
+                virtualMachineZoneStoppingCount = virtualMachineZoneStoppingCount + 1
+
+        stats[metricnameVmZoneTotal] = len(virtualmachines)
+        stats[metricnameVmZoneTotalRunning] = virtualMachineZoneRunningCount
+        stats[metricnameVmZoneTotalStopped] = virtualMachineZoneStoppedCount
+        stats[metricnameVmZoneTotalStopping] = virtualMachineZoneStoppingCount
+        stats[metricnameVmZoneTotalStarting] = virtualMachineZoneStartingCount
+
+
         for capacity in zone['capacity']:
             if capacity['type'] == 8:
                 stats[metricnameIpTotal] = capacity['capacitytotal']
                 stats[metricnameIpAllocated] = capacity['capacityused']
                 stats[metricnameIpAllocatedPercent] = capacity['percentused']
 
-  metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'count' ])
-  stats[metricnameZonesCount] = len(zones)
- 
-  try:
-        capacities = cloudstack.listCapacity({
-                })  
-  except:
-        logger('warn', "status err Unable to connect to CloudStack URL at %s for Capacity" % API_MONITORS)	
+  stats[metricnameZonesCount] = len(zones) 
+
+
   
   return stats	
-
-
 
 # callback configuration for module
 def configure_callback(conf):
