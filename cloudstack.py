@@ -89,6 +89,9 @@ class Client(BaseClient):
 
         def listAccounts(self, args={}):
                             return self.request('listAccounts', args)
+
+        def listCapacity(self, args={}):
+                            return self.request('listCapacity', args)
         
         
 NAME = 'cloudstack'
@@ -118,7 +121,25 @@ METRIC_TYPES = {
   'disksizetotal': ('h_disk_total', 'bytes'),
   'accountscount': ('g_accounts_total', 'current'),
   'accountenabled': ('g_accounts_total_enabled', 'current'),
-  'accountdisabled': ('g_accounts_total_disabled', 'current')
+  'accountdisabled': ('g_accounts_total_disabled', 'current'),
+  'zonecapamemorytotal': ('z_capacity_memory_total', 'current'),
+  'zonecapamemoryused': ('z_capacity_memory_used', 'current'),
+  'zonecapamemorypercentused': ('z_capacity_memory_percent-used', 'current'),
+  'zonecapacputotal': ('z_capacity_cpu_total', 'current'),
+  'zonecapacpuused': ('z_capacity_cpu_used', 'current'),
+  'zonecapacpupercentused': ('z_capacity_cpu_percent-used', 'current'),
+  'zonecapadisktotal': ('z_capacity_disk_total', 'current'),
+  'zonecapadiskused': ('z_capacity_disk_used', 'current'),
+  'zonecapadiskpercentused': ('z_capacity_disk_percent-used', 'current'),
+  'zonecapaprivateiptotal': ('z_capacity_privateip_total', 'current'),
+  'zonecapaprivateipused': ('z_capacity_privateip_used', 'current'),
+  'zonecapaprivateippercentused': ('z_capacity_privateip_percent-used', 'current'),
+  'zonecapasstotal': ('z_capacity_SSdisk_total', 'current'),
+  'zonecapassused': ('z_capacity_SSdisk_used', 'current'),
+  'zonecapasspercentused': ('z_capacity_SSdisk_percent-used', 'current'),
+  'zonecapadiskalloctotal': ('z_capacity_allocated_disk_total', 'current'),
+  'zonecapadiskallocused': ('z_capacity_allocated_disk_used', 'current'),
+  'zonecapadiskallocpercentused': ('z_capacity_allocated_disk_percent-used', 'current')
  
 }
 
@@ -253,6 +274,57 @@ def get_stats():
   stats[metricnameAccountsTotal] = len(accounts)
   stats[metricnameAccountsTotalEnabled] = accountsEnabledCount
   stats[metricnameAccountsTotalDisabled] = accountsDisabledCount
+
+  # collect capacity
+  try:
+        capacity = cloudstack.listCapacity()
+  except:
+      print("status err Unable to connect to CloudStack URL at %s for ListCapacity")
+
+
+  for c in capacity['capacity']:
+        if c['type'] == 0:
+                metricnameCapaZoneMemoryTotal = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapamemorytotal' ])
+                metricnameCapaZoneMemoryUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapamemoryused' ])
+                metricnameCapaZoneMemoryPercentUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapamemorypercentused' ])
+                stats[metricnameCapaZoneMemoryTotal] = c['capacitytotal']
+                stats[metricnameCapaZoneMemoryUsed] = c['capacityused']
+                stats[metricnameCapaZoneMemoryPercentUsed] = c['percentused']
+        elif c['type'] == 1:
+                metricnameCapaZoneCpuTotal = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapacputotal' ])
+                metricnameCapaZoneCpuUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapacpuused' ])
+                metricnameCapaZoneCpuPercentUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapacpupercentused' ])
+                stats[metricnameCapaZoneCpuTotal] = c['capacitytotal']
+                stats[metricnameCapaZoneCpuUsed] = c['capacityused']
+                stats[metricnameCapaZoneCpuPercentUsed] = c['percentused']
+        elif c['type'] == 2:
+                metricnameCapaZoneDiskTotal = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapadisktotal' ])
+                metricnameCapaZoneDiskUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapadiskused' ])
+                metricnameCapaZoneDiskPercentUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapadiskpercentused' ])
+                stats[metricnameCapaZoneDiskTotal] = c['capacitytotal']
+                stats[metricnameCapaZoneDiskUsed] = c['capacityused']
+                stats[metricnameCapaZoneDiskPercentUsed] = c['percentused']
+        elif c['type'] == 5:
+                metricnameCapaZonePrivateipTotal = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapaprivateiptotal' ])
+                metricnameCapaZonePrivateipUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapaprivateipused' ])
+                metricnameCapaZonePrivateipPercentUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapaprivateippercentused' ])
+                stats[metricnameCapaZonePrivateipTotal] = c['capacitytotal']
+                stats[metricnameCapaZonePrivateipUsed] = c['capacityused']
+                stats[metricnameCapaZonePrivateipPercentUsed] = c['percentused']
+        elif c['type'] == 6:
+                metricnameCapaZoneSSTotal = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapasstotal' ])
+                metricnameCapaZoneSSUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapassused' ])
+                metricnameCapaZoneSSPercentUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapasspercentused' ])
+                stats[metricnameCapaZoneSSTotal] = c['capacitytotal']
+                stats[metricnameCapaZoneSSUsed] = c['capacityused']
+                stats[metricnameCapaZoneSSPercentUsed] = c['percentused']
+        elif c['type'] == 9:
+                metricnameCapaZoneDiskAllocTotal = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapadiskalloctotal' ])
+                metricnameCapaZoneDiskAllocUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapadiskallocused' ])
+                metricnameCapaZoneDiskAllocPercentUsed = METRIC_DELIM.join([ 'zonecapacity', c['zonename'].lower(),  'zonecapadiskallocpercentused' ])
+                stats[metricnameCapaZoneDiskAllocTotal] = c['capacitytotal']
+                stats[metricnameCapaZoneDiskAllocUsed] = c['capacityused']
+                stats[metricnameCapaZoneDiskAllocPercentUsed] = c['percentused']
 
   
   return stats	
