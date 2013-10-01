@@ -177,7 +177,7 @@ def get_stats():
         metricnameVmZoneTotalStopping = METRIC_DELIM.join([ 'zonevmtotalstopping', zone['name'].lower(),  'zonevmtotalstopping' ])
         metricnameVmZoneTotalStarting = METRIC_DELIM.join([ 'zonevmtotalstarting', zone['name'].lower(),  'zonevmtotalstarting' ])
         metricnameVmZoneTotal = METRIC_DELIM.join([ 'zonevmtotal', zone['name'].lower(),  'zonevmtotal' ])
-        metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'count' ])
+        metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
 
 
         # collect number of virtual machines 
