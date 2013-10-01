@@ -103,6 +103,7 @@ METRIC_TYPES = {
   'memoryused': ('h_memory_used', 'memory'),
   'memorytotal': ('h_memory_total', 'memory'),
   'memoryallocated': ('h_memory_allocated', 'memory'),
+  'cpuallocated': ('h_cpu_allocated', 'percent'),
   'activeviewersessions': ('console_active_sessions', 'current'),
   'hostscount': ('hosts_count', 'current'),
   'zonescount': ('zones_count', 'current'),
@@ -132,7 +133,8 @@ def get_stats():
   cloudstack = Client(API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS)	
   try:
  	hypervisors = cloudstack.listHosts({
-                        'type': 'Routing'
+                        'type': 'Routing',
+                        'state': 'Up'
                 }) 
   except:
      	logger('warn', "status err Unable to connect to CloudStack URL at %s for Hosts" % API_MONITORS)
@@ -140,15 +142,13 @@ def get_stats():
 	metricnameMemUsed = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'memoryused' ])
 	metricnameMemTotal = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'memorytotal' ])
 	metricnameMemAlloc = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'memoryallocated' ])
-	metricnameDiskAlloc = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'disksizeallocated' ])
-	metricnameDiskTotal = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'disksizetotal' ])
+	#metricnameDiskAlloc = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'disksizeallocated' ])
+	#metricnameDiskTotal = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'disksizetotal' ])
 	try:
         	stats[metricnameMemUsed] = h['memoryused'] 
         	stats[metricnameMemTotal] = h['memorytotal'] 
-        	stats[metricnameMemAlloc] = h['memoryallocated'] 
-        	if h['islocalstorageactive'] == "True":
-			stats[metricnameDiskAlloc] = h['disksizeallocated'] 
-        		stats[metricnameDiskTotal] = h['disksizetotal'] 
+        	stats[metricnameMemAlloc] = h['memoryallocated']
+                stats[metricnameCpuAlloc] = h['cpuallocated'] 
   		logger('verb', "readings :  %s memory used %s " % (h['name'], h['memoryused']))
 	except (TypeError, ValueError), e:
         	pass
@@ -184,9 +184,6 @@ def get_stats():
         metricnameVmZoneTotal = METRIC_DELIM.join([ 'zonevmtotal', zone['name'].lower(),  'zonevmtotal' ])
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
-        metricnameAccountsTotal = METRIC_DELIM.join([ 'accounts',  'accountscount' ])
-        metricnameAccountsTotalEnabled = METRIC_DELIM.join([ 'accounts',  'accountenabled' ])
-        metricnameAccountsTotalDisabled = METRIC_DELIM.join([ 'accounts',  'accountdisabled' ])
 
 
         # collect number of virtual machines 
@@ -236,6 +233,9 @@ def get_stats():
   except:
       print("status err Unable to connect to CloudStack URL at %s for ListAccounts")
 
+  metricnameAccountsTotal = METRIC_DELIM.join([ 'accounts',  'accountscount' ])
+  metricnameAccountsTotalEnabled = METRIC_DELIM.join([ 'accounts',  'accountenabled' ])
+  metricnameAccountsTotalDisabled = METRIC_DELIM.join([ 'accounts',  'accountdisabled' ])
   accountsEnabledCount = 0
   accountsDisabledCount = 0
 
