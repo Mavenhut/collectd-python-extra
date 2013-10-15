@@ -21,7 +21,6 @@ def check_hosbill_status(dbhost,user,pwd,database):
     d1=date.today()
     d2=date.today()-timedelta(days=200)
     QUERYFAILEDEMAIL="SELECT * FROM hostbill.hb_email_log where status ='0' and date BETWEEN '%s' AND '%s'" % (d2,d1)
-    print(QUERYFAILEDEMAIL)
     con = MySQLdb.connect(dbhost, user, pwd, database)
     cursor = con.cursor()
     cursor.execute(QUERYFAILEDEMAIL)
@@ -75,7 +74,7 @@ try:
     val.plugin_instance = hostbill_stats['name']
     val.values = [hostbill_stats['nbfailedsentmails'] ]
     logger('verb', "Nb of failed sent emails: %s" % hostbill_stats['nbfailedsentmails'])
-    val.type_instance = "count"
+    val.type_instance = "nb-failed-sent-emails"
     val.type = "gauge"
     val.dispatch()
 
