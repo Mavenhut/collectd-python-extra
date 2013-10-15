@@ -15,6 +15,7 @@ from datetime import date, timedelta
 def check_hosbill_status(dbhost,user,pwd,database):
   if not (dbhost and user and pwd and database):
     logger('error', "empty parameter, dbhost: %s , user: %s , pwd: %s , database: %s" % (dbhost,user,pwd,database))
+    sys.exit(1)
   try:
     #today - 1 day
     d1=date.today()
