@@ -17,8 +17,8 @@ def check_hosbill_status(dbhost,user,pwd,database):
     logger('error', "empty parameter, dbhost: %s , user: %s , pwd: %s , database: %s" % (dbhost,user,pwd,database))
     sys.exit(1)
   try:
-    #today - 1 day
-    d1=date.today()
+    #date tommorrow and yesterday range
+    d1=date.today()+timedelta(days=1)
     d2=date.today()-timedelta(days=1)
     QUERYFAILEDEMAIL="SELECT * FROM hostbill.hb_email_log where status ='0' and date BETWEEN '%s' AND '%s'" % (d2,d1)
     con = MySQLdb.connect(dbhost, user, pwd, database)
