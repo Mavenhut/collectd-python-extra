@@ -19,7 +19,7 @@ def check_hosbill_status(dbhost,user,pwd,database):
   try:
     #today - 1 day
     d1=date.today()
-    d2=date.today()-timedelta(days=200)
+    d2=date.today()-timedelta(days=1)
     QUERYFAILEDEMAIL="SELECT * FROM hostbill.hb_email_log where status ='0' and date BETWEEN '%s' AND '%s'" % (d2,d1)
     con = MySQLdb.connect(dbhost, user, pwd, database)
     cursor = con.cursor()
