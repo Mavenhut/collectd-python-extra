@@ -43,7 +43,6 @@ def check_hosbill_status(dbhost,user,pwd,database):
 
 try:
   import collectd
-  global  dbhost, user, pwd, database, VERBOSE_LOGGING
 
   NAME = "hbstats"
   VERBOSE_LOGGING = False
@@ -54,6 +53,7 @@ try:
   database = ""
 
   def config_callback(conf):
+    global  dbhost, user, pwd, database, VERBOSE_LOGGING
     for node in conf.children:
       logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
       if node.key == "DbHost":
