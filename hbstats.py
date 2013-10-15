@@ -44,7 +44,7 @@ try:
   import collectd
   global  dbhost, user, pwd, database, VERBOSE_LOGGING
 
-  NAME = "hostbillstats"
+  NAME = "hbstats"
   VERBOSE_LOGGING = False
 
   dbhost = ""
