@@ -155,6 +155,7 @@ def get_stats():
   try:
  	hypervisors = cloudstack.listHosts({
                         'type': 'Routing',
+                        'resourcestate': 'Enabled',
                         'state': 'Up'
                 }) 
   except:
