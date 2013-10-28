@@ -106,6 +106,7 @@ METRIC_TYPES = {
   'memoryused': ('h_memory_used', 'memory'),
   'memorytotal': ('h_memory_total', 'memory'),
   'memoryallocated': ('h_memory_allocated', 'memory'),
+  'hvmtotalrunning': ('h_vm_total_running', 'current'),
   'cpuallocated': ('h_cpu_allocated', 'percent'),
   'activeviewersessions': ('console_active_sessions', 'current'),
   'zonehosttotal': ('hosts_count', 'current'),
@@ -149,7 +150,8 @@ hypervisors = []
 
 def get_stats():
   stats = dict()
-  
+  hvm= dict()
+
   logger('verb', "get_stats calls API %s KEY %s SECRET %s" % (API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS))
   cloudstack = Client(API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS)	
   try:
@@ -227,13 +229,24 @@ def get_stats():
 
         for virtualmachine in virtualmachines:
             if virtualmachine['state'] == 'Running':
-                virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
+                virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1i
+                #add to a dict to get the Running VMs per hypervisor
+                host = (virtualmachine['hostname'])
+                if host in hvm:
+                        hvm[host] += 1
+                else:
+                        hvm[host] = 1
             elif virtualmachine['state'] == 'Stopped':
                 virtualMachineZoneStoppedCount = virtualMachineZoneStoppedCount + 1
             elif virtualmachine['state'] == 'Stopping':
                 virtualMachineZoneStartingCount = virtualMachineZoneStartingCount + 1
             elif virtualmachine['state'] == 'Starting':
                 virtualMachineZoneStoppingCount = virtualMachineZoneStoppingCount + 1
+        #add metric VMs running per hypervisor
+        for h in hypervisors:   
+                metricnameVmHTotalRunning = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalrunning' ])              
+                stats[metricnameVmHTotalRunning] = hvm[h]
+
 
         stats[metricnameVmZoneTotal] = len(virtualmachines)
         stats[metricnameVmZoneTotalRunning] = virtualMachineZoneRunningCount
