@@ -255,18 +255,18 @@ def get_stats():
                 'pagesize': str(querypagesize)
                 })
         all_zones = []
-                if len(zones) == querypagesize:
-                query_tmp = zones
-                while len(query_tmp) > 0:
-                        all_zones.extend(query_tmp)
-                        querypage = querypage + 1
-                        query_tmp = cloudstack.listZones({
-                                        'showcapacities': 'true',
-                                        'page': str(querypage),
-                                        'pagesize': str(querypagesize)
-                                        })
-                else:
-                        all_zones.extend(zones)
+        if len(zones) == querypagesize:
+            query_tmp = zones
+            while len(query_tmp) > 0:
+                all_zones.extend(query_tmp)
+                querypage = querypage + 1
+                query_tmp = cloudstack.listZones({
+                            'showcapacities': 'true',
+                            'page': str(querypage),
+                            'pagesize': str(querypagesize)
+                            })
+        else:
+            all_zones.extend(zones)
         zones = all_zones
 
   except:
