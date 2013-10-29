@@ -178,7 +178,7 @@ def get_stats():
                 })
         all_hypervisors = []
         if len(events) == querypagesize:
-                query_tmp = events
+                query_tmp = hypervisors
                 while len(query_tmp) > 0:
                         all_hypervisors.extend(query_tmp)
                         querypage = querypage + 1
