@@ -288,10 +288,31 @@ def get_stats():
 
         # collect number of virtual machines 
         try:
+            query_tmp = None
+            querypage = 1
+            querypagesize = 500
             virtualmachines = cloudstack.listVirtualMachines({
                 'listall': 'true',
-                'details': 'all'
+                'details': 'all',
+                'page': str(querypage),
+                'pagesize': str(querypagesize)
                 })
+            all_virtualmachines = []
+            if len(virtualmachines) == querypagesize:
+                query_tmp = virtualmachines
+                while len(query_tmp) > 0:
+                        all_virtualmachines.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listVirtualMachines({
+                                        'listall': 'true',
+                                        'details': 'all',
+                                        'page': str(querypage),
+                                        'pagesize': str(querypagesize)
+                                        })
+            else:
+                all_virtualmachines.extend(virtualmachines)
+            virtualmachines = all_virtualmachines
+                
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVms" % API_MONITORS)
 
