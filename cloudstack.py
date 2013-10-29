@@ -177,7 +177,7 @@ def get_stats():
                         'state': 'Up'
                         })
         all_hypervisors = []
-        if len(events) == querypagesize:
+        if len(hypervisors) == querypagesize:
                 query_tmp = hypervisors
                 while len(query_tmp) > 0:
                         all_hypervisors.extend(query_tmp)
