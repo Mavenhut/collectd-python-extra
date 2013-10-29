@@ -246,11 +246,32 @@ def get_stats():
 
   # collect number of zones, available public ips and VMs
   try:
+        query_tmp = None
+        querypage = 1
+        querypagesize = 500
         zones = cloudstack.listZones({
-                'showcapacities': 'true'
+                'showcapacities': 'true',
+                'page': str(querypage),
+                'pagesize': str(querypagesize)
                 })
+        all_zones = []
+                if len(zones) == querypagesize:
+                query_tmp = zones
+                while len(query_tmp) > 0:
+                        all_zones.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listZones({
+                                        'showcapacities': 'true',
+                                        'page': str(querypage),
+                                        'pagesize': str(querypagesize)
+                                        })
+                else:
+                        all_zones.extend(zones)
+        zones = all_zones
+
   except:
       logger('warn', "status err Unable to connect to CloudStack URL at %s for ListZone" % API_MONITORS)
+
   for zone in zones:
         metricnameIpAllocated = METRIC_DELIM.join([ 'zonepublicipallocated', zone['name'].lower(),  'zonepublicipallocated' ])
         metricnameIpTotal = METRIC_DELIM.join([ 'zonepubliciptotal', zone['name'].lower(),  'zonepubliciptotal' ])
