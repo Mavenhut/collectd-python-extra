@@ -339,10 +339,30 @@ def get_stats():
 
         # collect number of root volumes 
         try:
+            query_tmp = None
+            querypage = 1
+            querypagesize = 500
             rootvolumes = cloudstack.listVolumes({
                 'listall': 'true',
-                'type': 'ROOT'
+                'type': 'ROOT',
+                'page': str(querypage),
+                'pagesize': str(querypagesize)
                 })
+            all_rootvolumes = []
+            if len(rootvolumes) == querypagesize:
+                query_tmp = rootvolumes
+                while len(query_tmp) > 0:
+                        all_rootvolumes.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listVolumes({
+                                        'listall': 'true',
+                                        'type': 'ROOT',
+                                        'page': str(querypage),
+                                        'pagesize': str(querypagesize)
+                                         })
+            else:
+                all_rootvolumes.extend(rootvolumes)
+            rootvolumes = all_rootvolumes
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVolumes" % API_MONITORS)
 
