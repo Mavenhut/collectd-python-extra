@@ -229,7 +229,7 @@ def get_stats():
 
         for virtualmachine in virtualmachines:
             if virtualmachine['state'] == 'Running':
-                virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1i
+                virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
                 #add to a dict to get the Running VMs per hypervisor
                 host = (virtualmachine['hostname'])
                 if host in hvm:
