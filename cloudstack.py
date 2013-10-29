@@ -92,6 +92,10 @@ class Client(BaseClient):
 
         def listCapacity(self, args={}):
                             return self.request('listCapacity', args)
+
+        def listVolumes(self, args={}):
+                            return self.request('listVolumes', args)
+
         
         
 NAME = 'cloudstack'
@@ -107,6 +111,10 @@ METRIC_TYPES = {
   'memorytotal': ('h_memory_total', 'memory'),
   'memoryallocated': ('h_memory_allocated', 'memory'),
   'hvmtotalrunning': ('h_vm_total_running', 'current'),
+  'hvmtotalstarting': ('h_vm_total_starting', 'current'),
+  'hvmtotalstopping': ('h_vm_total_stopping', 'current'),
+  'hvmtotalstopped': ('h_vm_total_stopped', 'current'),
+  'hvmtotal': ('h_vm_total', 'current'),
   'cpuallocated': ('h_cpu_allocated', 'percent'),
   'activeviewersessions': ('console_active_sessions', 'current'),
   'zonehosttotal': ('hosts_count', 'current'),
@@ -150,7 +158,10 @@ hypervisors = []
 
 def get_stats():
   stats = dict()
-  hvm= dict()
+  hvmrunning = dict()
+  hvmstopped = dict()
+  hvmstopping = dict()
+  hvmstarting = dict()
 
   logger('verb', "get_stats calls API %s KEY %s SECRET %s" % (API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS))
   cloudstack = Client(API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS)	
@@ -231,11 +242,11 @@ def get_stats():
             if virtualmachine['state'] == 'Running':
                 virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
                 #add to a dict to get the Running VMs per hypervisor
-                host = (virtualmachine['hostname'])
-                if host in hvm:
-                        hvm[host] += 1
-                else:
-                        hvm[host] = 1
+                #host = (virtualmachine['hostname'])
+                #if host in hvm:
+                #        hvm[host] += 1
+                #else:
+                #        hvm[host] = 1
             elif virtualmachine['state'] == 'Stopped':
                 virtualMachineZoneStoppedCount = virtualMachineZoneStoppedCount + 1
             elif virtualmachine['state'] == 'Stopping':
@@ -243,11 +254,11 @@ def get_stats():
             elif virtualmachine['state'] == 'Starting':
                 virtualMachineZoneStoppingCount = virtualMachineZoneStoppingCount + 1
         #add metric VMs running per hypervisor
-        for h in hypervisors:   
-                metricnameVmHTotalRunning = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalrunning' ])              
-                hname = h['name'].lower()
-                if hname in hvm:
-                    stats[metricnameVmHTotalRunning] = hvm[hname]
+        #for h in hypervisors:   
+        #        metricnameVmHTotalRunning = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalrunning' ])              
+        #        hname = h['name'].lower()
+        #        if hname in hvm:
+        #            stats[metricnameVmHTotalRunning] = hvm[hname]
 
 
         stats[metricnameVmZoneTotal] = len(virtualmachines)
@@ -255,6 +266,78 @@ def get_stats():
         stats[metricnameVmZoneTotalStopped] = virtualMachineZoneStoppedCount
         stats[metricnameVmZoneTotalStopping] = virtualMachineZoneStoppingCount
         stats[metricnameVmZoneTotalStarting] = virtualMachineZoneStartingCount
+
+        # collect number of root volumes 
+        try:
+            rootvolumes = cloudstack.listVolumes({
+                'listall': 'true',
+                'type': 'ROOT'
+                })
+        except:
+            logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVolumes" % API_MONITORS)
+
+        
+        for rootvolume in rootvolumes:
+            if rootvolume['vmstate'] == 'Running':
+                #add to a dict to get the Running VMs per hypervisor
+                host = (rootvolume['storage'])
+                if host in hvmrunning:
+                        hvmrunning[host] += 1
+                else:
+                        hvmrunning[host] = 1
+            elif rootvolume['vmstate'] == 'Stopped':
+                #add to a dict to get the Stopped VMs per hypervisor
+                host = (rootvolume['storage'])
+                if host in hvmstopped:
+                        hvmstopped[host] += 1
+                else:
+                        hvmstopped[host] = 1
+            elif rootvolume['vmstate'] == 'Stopping':
+                #add to a dict to get the Stopping VMs per hypervisor
+                host = (rootvolume['storage'])
+                if host in hvmstopping:
+                        hvmstopping[host] += 1
+                else:
+                        hvmstopping[host] = 1
+            elif rootvolume['vmstate'] == 'Starting':
+                #add to a dict to get the Starting VMs per hypervisor
+                host = (rootvolume['storage'])
+                if host in hvmstarting:
+                        hvmstarting[host] += 1
+                else:
+                        hvmstarting[host] = 1
+        #add metric VMs per hypervisor
+        for h in hypervisors:
+                virtualMachineHTotalCount = 0
+                metricnameVmHTotal = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotal' ])
+                metricnameVmHTotalRunning = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalrunning' ])
+                metricnameVmHTotalStarting = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalstarting' ])
+                metricnameVmHTotalStopping = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalstopping' ])
+                metricnameVmHTotalStopped = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalstopped' ])
+
+                hname = h['name'].lower()
+                if hname in hvmrunning:
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        stats[metricnameVmHTotalRunning] = hvmrunning[hname]
+                else:
+                        stats[metricnameVmHTotalRunning] = 0
+                if hname in hvmstarting:
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        stats[metricnameVmHTotalStarting] = hvmstarting[hname]
+                else:
+                        stats[metricnameVmHTotalStarting] = 0
+                if hname in hvmstopping:
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        stats[metricnameVmHTotalStopping] = hvmstopping[hname]
+                else:
+                        stats[metricnameVmHTotalStopping] = 0
+                if hname in hvmstopped:
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        stats[metricnameVmHTotalStopped] = hvmstopped[hname]
+                else:
+                        stats[metricnameVmHTotalStopped] = 0
+                
+                stats[metricnameVmHTotal] = virtualMachineHTotalCount
 
 
         for capacity in zone['capacity']:
