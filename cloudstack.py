@@ -317,22 +317,22 @@ def get_stats():
 
                 hname = h['name'].lower()
                 if hname in hvmrunning:
-                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + hvmrunning[hname]
                         stats[metricnameVmHTotalRunning] = hvmrunning[hname]
                 else:
                         stats[metricnameVmHTotalRunning] = 0
                 if hname in hvmstarting:
-                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + hvmstarting[hname]
                         stats[metricnameVmHTotalStarting] = hvmstarting[hname]
                 else:
                         stats[metricnameVmHTotalStarting] = 0
                 if hname in hvmstopping:
-                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + hvmstopping[hname]
                         stats[metricnameVmHTotalStopping] = hvmstopping[hname]
                 else:
                         stats[metricnameVmHTotalStopping] = 0
                 if hname in hvmstopped:
-                        virtualMachineHTotalCount = virtualMachineHTotalCount + 1
+                        virtualMachineHTotalCount = virtualMachineHTotalCount + hvmstopped[hname]
                         stats[metricnameVmHTotalStopped] = hvmstopped[hname]
                 else:
                         stats[metricnameVmHTotalStopped] = 0
