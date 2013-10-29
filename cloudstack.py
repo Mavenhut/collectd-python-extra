@@ -246,7 +246,8 @@ def get_stats():
         for h in hypervisors:   
                 metricnameVmHTotalRunning = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalrunning' ])              
                 hname = h['name'].lower()
-                stats[metricnameVmHTotalRunning] = hvm[hname]
+                if hname in hvm:
+                    stats[metricnameVmHTotalRunning] = hvm[hname]
 
 
         stats[metricnameVmZoneTotal] = len(virtualmachines)
