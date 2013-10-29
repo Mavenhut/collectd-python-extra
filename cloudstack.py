@@ -175,7 +175,7 @@ def get_stats():
                         'page': str(querypage),
                         'pagesize': str(querypagesize),
                         'state': 'Up'
-                })
+                        })
         all_hypervisors = []
         if len(events) == querypagesize:
                 query_tmp = hypervisors
@@ -183,12 +183,12 @@ def get_stats():
                         all_hypervisors.extend(query_tmp)
                         querypage = querypage + 1
                         query_tmp = cloudstack.listHosts({
-                                'type': 'Routing',
-                                'resourcestate': 'Enabled',
-                                'page': str(querypage),
-                                'pagesize': str(querypagesize),
-                                'state': 'Up'
-                })
+                                    'type': 'Routing',
+                                    'resourcestate': 'Enabled',
+                                    'page': str(querypage),
+                                    'pagesize': str(querypagesize),
+                                    'state': 'Up'
+                                    })
         else:
                 all_hypervisors.extend(hypervisors)
         hypervisors = all_hypervisors
