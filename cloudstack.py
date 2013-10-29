@@ -442,9 +442,28 @@ def get_stats():
 
   # collect accounts
   try:
+        query_tmp = None
+        querypage = 1
+        querypagesize = 500
         accounts = cloudstack.listAccounts({
-                'listall': 'true'
+                'listall': 'true',
+                'page': str(querypage),
+                'pagesize': str(querypagesize)
                 })
+        all_accounts = []
+        if len(accounts) == querypagesize:
+                query_tmp = accounts
+                while len(query_tmp) > 0:
+                        all_accounts.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listAccounts({
+                                        'listall': 'true',
+                                        'page': str(querypage),
+                                        'pagesize': str(querypagesize)
+                                        })
+        else:
+                all_accounts.extend(accounts)
+        accounts = all_accounts
   except:
       print("status err Unable to connect to CloudStack URL at %s for ListAccounts")
 
