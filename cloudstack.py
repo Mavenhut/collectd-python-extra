@@ -166,11 +166,32 @@ def get_stats():
   logger('verb', "get_stats calls API %s KEY %s SECRET %s" % (API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS))
   cloudstack = Client(API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS)	
   try:
+        query_tmp = None
+        querypage = 1
+        querypagesize = 500
  	hypervisors = cloudstack.listHosts({
                         'type': 'Routing',
                         'resourcestate': 'Enabled',
+                        'page': str(querypage),
+                        'pagesize': str(querypagesize),
                         'state': 'Up'
-                }) 
+                })
+        all_hypervisors = []
+        if len(events) == querypagesize:
+                query_tmp = events
+                while len(query_tmp) > 0:
+                        all_hypervisors.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listHosts({
+                                'type': 'Routing',
+                                'resourcestate': 'Enabled',
+                                'page': str(querypage),
+                                'pagesize': str(querypagesize),
+                                'state': 'Up'
+                })
+        else:
+                all_hypervisors.extend(hypervisors)
+        hypervisors = all_hypervisors
   except:
      	logger('warn', "status err Unable to connect to CloudStack URL at %s for Hosts" % API_MONITORS)
   for  h in hypervisors:
