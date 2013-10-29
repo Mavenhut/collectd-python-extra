@@ -213,9 +213,29 @@ def get_stats():
 
   # collect number of active console sessions
   try:
+        query_tmp = None
+        querypage = 1
+        querypagesize = 500
 	systemvms = cloudstack.listSystemVms({
-		'systemvmtype': 'consoleproxy'
+		'systemvmtype': 'consoleproxy',
+                'page': str(querypage),
+                'pagesize': str(querypagesize)
 		})
+        all_systemvms = []
+        if len(systemvms) == querypagesize:
+                query_tmp = systemvms
+                while len(query_tmp) > 0:
+                        all_systemvms.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listSystemVms({
+                        'systemvmtype': 'consoleproxy',
+                        'page': str(querypage),
+                        'pagesize': str(querypagesize)
+                        })
+        else:
+                all_systemvms.extend(systemvms)
+        systemvms = all_systemvms
+
   except:
      	logger('warn', "status err Unable to connect to CloudStack URL at %s for SystemVms" % API_MONITORS)
 
