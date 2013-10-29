@@ -485,26 +485,7 @@ def get_stats():
 
   # collect capacity
   try:
-        query_tmp = None
-        querypage = 1
-        querypagesize = 500
-        capacity = cloudstack.listCapacity({
-                    'page': str(querypage),
-                    'pagesize': str(querypagesize)
-                    })
-        all_capacity = []
-        if len(capacity) == querypagesize:
-                query_tmp = capacity
-                while len(query_tmp) > 0:
-                        all_capacity.extend(query_tmp)
-                        querypage = querypage + 1
-                        query_tmp = cloudstack.listCapacity({
-                                        'page': str(querypage),
-                                        'pagesize': str(querypagesize)
-                                        })
-        else:
-                all_capacity.extend(capacity)
-        capacity = all_capacity
+        capacity = cloudstack.listCapacity()
   except:
       print("status err Unable to connect to CloudStack URL at %s for ListCapacity")
 
