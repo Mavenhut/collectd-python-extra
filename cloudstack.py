@@ -241,25 +241,12 @@ def get_stats():
         for virtualmachine in virtualmachines:
             if virtualmachine['state'] == 'Running':
                 virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
-                #add to a dict to get the Running VMs per hypervisor
-                #host = (virtualmachine['hostname'])
-                #if host in hvm:
-                #        hvm[host] += 1
-                #else:
-                #        hvm[host] = 1
             elif virtualmachine['state'] == 'Stopped':
                 virtualMachineZoneStoppedCount = virtualMachineZoneStoppedCount + 1
             elif virtualmachine['state'] == 'Stopping':
                 virtualMachineZoneStartingCount = virtualMachineZoneStartingCount + 1
             elif virtualmachine['state'] == 'Starting':
                 virtualMachineZoneStoppingCount = virtualMachineZoneStoppingCount + 1
-        #add metric VMs running per hypervisor
-        #for h in hypervisors:   
-        #        metricnameVmHTotalRunning = METRIC_DELIM.join([ h['name'].lower(), h['podname'].lower(), re.sub(r"\s+", '-', h['zonename'].lower()), 'hvmtotalrunning' ])              
-        #        hname = h['name'].lower()
-        #        if hname in hvm:
-        #            stats[metricnameVmHTotalRunning] = hvm[hname]
-
 
         stats[metricnameVmZoneTotal] = len(virtualmachines)
         stats[metricnameVmZoneTotalRunning] = virtualMachineZoneRunningCount
