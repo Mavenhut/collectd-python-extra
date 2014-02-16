@@ -4,12 +4,11 @@
 #This is a collectd python script to detect bondings status. any MII state other than "up" will be reported as failed
 
 
-NAME = "Bondstatus"
+global NAME = "Bondstatus"
 
 def check_bond_status(intBondID):
     try:
         Bondstatus = {}
-        Bondstatus['name'] = NAME
         strBondPath = "/proc/net/bonding/bond%d" % intBondID
         for line in open(strBondPath).readlines():
             if "MII Status" in line:
@@ -18,14 +17,14 @@ def check_bond_status(intBondID):
                 if strState != "up":
                     #bond nok
                     intState = 1
-                    Bondstatus['intState'] = intState
-                    Bondstatus['strState'] = strState
-                    return bondstatus
+                    str(Bondstatus['intState')] = intState
+                    str(Bondstatus['strState']) = strState
+                    return Bondstatus
                 else:
                 #bond ok
                     intState = 0
-                    Bondstatus['intState'] = intState
-                    Bondstatus['strState'] = strState
+                    str(Bondstatus['intState']) = intState
+                    str(Bondstatus['strState']) = strState
         return Bondstatus
     except:
         return
@@ -53,9 +52,9 @@ try:
         for i in range(0, 10):
             bond_status = check_bond_status(i)
             val = collectd.Values(plugin=NAME, type="gauge")
-            val.plugin_instance = bond_status['name']
-            val.values = bond_status['intState']
-            logger('verb', "Bond%s status is: %d" % i,bond_status['intState'])
+            #val.plugin_instance = bond_status['name']
+            val.values = [bond_status['intState'] ]
+            logger('verb', "Bond%s status is: %s" % (i,bond_status['intState']))
             val.type_instance = "Bond%s" % i
             val.type = "gauge"
             val.dispatch()
@@ -74,6 +73,6 @@ except ImportError:
             if bond_status['intState'] == 0:
                 print "bond%d is up" % i
             else:
-                print "bond%d error:%s" % i,bond_status['strState']
+                print "bond%d error:%s" % (i,bond_status['strState'])
         except:
             continue
