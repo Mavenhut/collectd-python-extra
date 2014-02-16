@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #Author: Loic Lambiel, exoscale
+#This is a collectd python script to detect bondings status. any MII state other than "up" will be reported as failed
 
 
 def bond_status(intBondID):
@@ -52,6 +53,8 @@ try:
             val.type = "gauge"
             val.dispatch()
 
+    collectd.register_read(read_callback) 
+
 
 except ImportError:
     ## we're not running inside collectd
@@ -62,7 +65,7 @@ except ImportError:
         try:
             intStatus,strStatus = bond_status(i)
             if intStatus == 0:
-                print "bond%d ok" % i
+                print "bond%d is up" % i
             else:
                 print "bond%d error:%s" % i,strStatus
         except:
