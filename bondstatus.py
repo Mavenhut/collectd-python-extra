@@ -4,28 +4,35 @@
 #This is a collectd python script to detect bondings status. any MII state other than "up" will be reported as failed
 
 
-def bond_status(intBondID):
+NAME = "Bondstatus"
+
+def check_bond_status(intBondID):
     try:
+        Bondstatus = {}
+        Bondstatus['name'] = NAME
         strBondPath = "/proc/net/bonding/bond%d" % intBondID
         for line in open(strBondPath).readlines():
             if "MII Status" in line:
-                strStatus = line.split(":")
-                strStatus = strStatus[1].strip()
-                if strStatus != "up":
+                strState = line.split(":")
+                strState = strState[1].strip()
+                if strState != "up":
                     #bond nok
-                    intStatus = 1
-                    return intStatus,strStatus
+                    intState = 1
+                    Bondstatus['intState'] = intState
+                    Bondstatus['strState'] = strState
+                    return bondstatus
                 else:
                 #bond ok
-                    intStatus = 0
-        return intStatus,strStatus
+                    intState = 0
+                    Bondstatus['intState'] = intState
+                    Bondstatus['strState'] = strState
+        return Bondstatus
     except:
         return
 
 try:
     import collectd
 
-    NAME = "Bonding"
     VERBOSE_LOGGING = True
 
     # logging function
@@ -44,11 +51,11 @@ try:
     def read_callback():
         i = 0
         for i in range(0, 10):
-            intStatus = bond_status(i)
+            bond_status = check_bond_status(i)
             val = collectd.Values(plugin=NAME, type="gauge")
-            #val.plugin_instance = hostbill_stats['name']
-            val.values = intStatus
-            logger('verb', "Bond%s status is: %d" % i,intStatus)
+            val.plugin_instance = bond_status['name']
+            val.values = bond_status['intState']
+            logger('verb', "Bond%s status is: %d" % i,bond_status['intState'])
             val.type_instance = "Bond%s" % i
             val.type = "gauge"
             val.dispatch()
@@ -63,10 +70,10 @@ except ImportError:
     i = 0
     for i in range(0, 10):
         try:
-            intStatus,strStatus = bond_status(i)
-            if intStatus == 0:
+            bond_status = check_bond_status(i)
+            if bond_status['intState'] == 0:
                 print "bond%d is up" % i
             else:
-                print "bond%d error:%s" % i,strStatus
+                print "bond%d error:%s" % i,bond_status['strState']
         except:
             continue
