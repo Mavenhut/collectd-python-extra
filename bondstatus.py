@@ -4,7 +4,6 @@
 #This is a collectd python script to detect bondings status. any MII state other than "up" will be reported as failed
 
 
-global NAME = "Bondstatus"
 
 def check_bond_status(intBondID):
     try:
@@ -17,14 +16,14 @@ def check_bond_status(intBondID):
                 if strState != "up":
                     #bond nok
                     intState = 1
-                    str(Bondstatus['intState')] = intState
-                    str(Bondstatus['strState']) = strState
+                    Bondstatus['intState'] = intState
+                    Bondstatus['strState'] = strState
                     return Bondstatus
                 else:
                 #bond ok
                     intState = 0
-                    str(Bondstatus['intState']) = intState
-                    str(Bondstatus['strState']) = strState
+                    Bondstatus['intState'] = intState
+                    Bondstatus['strState'] = strState
         return Bondstatus
     except:
         return
@@ -32,7 +31,9 @@ def check_bond_status(intBondID):
 try:
     import collectd
 
-    VERBOSE_LOGGING = True
+    VERBOSE_LOGGING = False
+
+    NAME = "Bondstatus"
 
     # logging function
     def logger(t, msg):
@@ -52,12 +53,12 @@ try:
         for i in range(0, 10):
             bond_status = check_bond_status(i)
             val = collectd.Values(plugin=NAME, type="gauge")
-            val.plugin_instance = bond_status['name']
-            val.values = [bond_status['intState'] ]
-            logger('verb', "Bond%s status is: %s" % (i,bond_status['intState']))
-            val.type_instance = "Bond%s" % i
-            val.type = "gauge"
-            val.dispatch()
+            if bond_status:
+                val.values = [bond_status['intState'] ]
+                logger('verb', "Bond%s status is: %s" % (i,bond_status['intState']))
+                val.type_instance = "Bond%s" % i
+                val.type = "gauge"
+                val.dispatch()
 
     collectd.register_read(read_callback) 
 
