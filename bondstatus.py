@@ -52,7 +52,7 @@ try:
         for i in range(0, 10):
             bond_status = check_bond_status(i)
             val = collectd.Values(plugin=NAME, type="gauge")
-            #val.plugin_instance = bond_status['name']
+            val.plugin_instance = bond_status['name']
             val.values = [bond_status['intState'] ]
             logger('verb', "Bond%s status is: %s" % (i,bond_status['intState']))
             val.type_instance = "Bond%s" % i
