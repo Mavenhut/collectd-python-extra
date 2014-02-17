@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #Author: Loic Lambiel, exoscale
-#This is a collectd python script to detect bondings status. any MII state other than "up" will be reported as failed
+#This is a collectd python script to detect bondings status. any MII state other than "up" will be reported as failed. We expect 2 NICs with "up" status in our bond.
 
 
 
@@ -11,6 +11,7 @@ def check_bond_status(intBondID):
         strBondPath = "/proc/net/bonding/bond%d" % intBondID
         for line in open(strBondPath).readlines():
             if "MII Status" in line:
+                n = 0
                 strState = line.split(":")
                 strState = strState[1].strip()
                 if strState != "up":
@@ -18,12 +19,17 @@ def check_bond_status(intBondID):
                     intState = 1
                     Bondstatus['intState'] = intState
                     Bondstatus['strState'] = strState
+                    #we stop at first error
                     return Bondstatus
                 else:
-                #bond ok
+                    #bond ok
+                    n = n + 1
                     intState = 0
                     Bondstatus['intState'] = intState
                     Bondstatus['strState'] = strState
+        #we expect to find 3 "up" in our typical bond, trigg error if not            
+        if n != 3:
+            intState = 1
         return Bondstatus
     except:
         return
