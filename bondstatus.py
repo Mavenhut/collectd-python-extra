@@ -8,10 +8,10 @@
 def check_bond_status(intBondID):
     try:
         Bondstatus = {}
+        n = 0
         strBondPath = "/proc/net/bonding/bond%d" % intBondID
         for line in open(strBondPath).readlines():
             if "MII Status" in line:
-                n = 0
                 strState = line.split(":")
                 strState = strState[1].strip()
                 if strState != "up":
