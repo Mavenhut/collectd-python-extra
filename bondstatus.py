@@ -30,6 +30,9 @@ def check_bond_status(intBondID):
         #we expect to find 3 "up" in our typical bond, trigg error if not            
         if n != 3:
             intState = 1
+            strState = "One NIC is missing in bond"
+            Bondstatus['intState'] = intState
+            Bondstatus['strState'] = strState
         return Bondstatus
     except:
         return
