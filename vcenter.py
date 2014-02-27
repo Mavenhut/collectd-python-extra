@@ -4,36 +4,35 @@
 # Description : This is a collectd python module to gather stats from Vmware vcenters
 
 import collectd
-from pysphere import VIServer
+from pysphere import VIServer, VIProperty
         
         
         
 NAME = 'Vcenter'
 
-DEFAULT_VCENTERLIST = ''
-DEFAULT_USERNAME = ''
-DEFAULT_PASSWORD = ''
-VERBOSE_LOGGING = False
 
 METRIC_TYPES = {
-    'datacenters': ('datacenters', 'current'),
-    'clusters': ('clusters', 'current'),
-    'hosts': ('hosts', 'current'),
-    'runningVMS': ('vm_running', 'current'),
-    'stoppedVMS': ('vm_stopped', 'current'),
-    'totalVM': ('vm_stopped', 'current'),
-    'zonerunningVMS': ('vm_running', 'current'),
-    'zonestoppedVMS': ('vm_stopped', 'current'),
-    'zonetotalVM': ('vm_stopped', 'current'),
-    'datacenterClusters': ('d_clusters', 'current'),
-    'datacenterHosts': ('d_hosts', 'current'),
-    'clussterHosts': ('c_hosts', 'current'),
-    'datacenterRunningVMS': ('d_vm_running', 'current'),
-    'datacenterStoppedVMS': ('d_vm_stopped', 'current'),
-    'datacenterTotalVMS': ('d_vm_total', 'current'),
-    'clusterRunningVMS': ('c_vm_running', 'current'),
-    'clusterStoppedVMS': ('c_vm_stopped', 'current'),
-    'clusterTotalVMS': ('c_vm_total', 'current'),
+    'globaldatacenterscount': ('datacenters', 'current'),
+    'globalclusterscount': ('clusters', 'current'),
+    'globalhostscount': ('hosts', 'current'),
+    'zonedatacenterscount': ('z_datacenters', 'current'),
+    'zoneclusterscount': ('z_clusters', 'current'),
+    'zonehostscount': ('z_hosts', 'current'),
+    'globalrunningVMS': ('vm_running', 'current'),
+    'globalstoppedVMS': ('vm_stopped', 'current'),
+    'globaltotalVMS': ('vm_stopped', 'current'),
+    'zonerunningVMS': ('z_vm_running', 'current'),
+    'zonestoppedVMS': ('z_vm_stopped', 'current'),
+    'zonetotalVMS': ('z_vm_stopped', 'current'),
+    'datacenterclusterscount': ('d_clusters', 'current'),
+    'datacenterhostscount': ('d_hosts', 'current'),
+    'clussterhostscount': ('c_hosts', 'current'),
+    'datacenterrunningVMS': ('d_vm_running', 'current'),
+    'datacenterstoppedVMS': ('d_vm_stopped', 'current'),
+    'datacentertotalVMS': ('d_vm_total', 'current'),
+    'clusterrunningVMS': ('c_vm_running', 'current'),
+    'clusterstoppedVMS': ('c_vm_stopped', 'current'),
+    'clustertotalVMS': ('c_vm_total', 'current'),
  
 }
 
@@ -46,6 +45,9 @@ def get_stats():
     logger('verb', "get_stats calls vcenterlist %s user %s" % (VCENTERLIST, USERNAME))
     server = VIServer()
 
+    GlobalDatacentersCount = ''
+    GlobalClustersCount = ''
+    GlobalHostsCount = ''
     GlobalRunningVMS = ''
     GlobalStoppedVMS = ''
     GlobalTotalVMS = ''
@@ -56,27 +58,45 @@ def get_stats():
         except:
             logger('warn', "failed to connect to %s" % (vcenter))
             continue
-
-        datacenters = server.get_datacenters()
-        DatacentersCount = len(datacenters)
-
+         
+        ZoneDatacentersCount = ''
+        ZoneClustersCount = ''
+        ZoneHostsCount = ''
         ZoneRunningVMS = ''
         ZoneStoppedVMS = ''
         ZoneTotalVMS = ''
-        DatacenterRunningVMS = ''
-        DatacenterStoppedVMS = ''
-        DatacenterTotalVMS = ''
 
-        for datacenter in datacenters:
-            clusters = server.get_clusters()
-            ClustersCount = len(clusters)
+
+        datacenters = server.get_datacenters()
+        ZoneDatacentersCount = len(datacenters)
+        GlobalDatacentersCount = GlobalDatacentersCount + ZoneDatacentersCount
+
+        for d in datacenters:
+
+            DatacenterRunningVMS = ''
+            DatacenterStoppedVMS = ''
+            DatacenterTotalVMS = ''
+            DatacenterClustersCount = ''
+            DatacenterHostsCount = ''
+
+            clusters = server.get_clusters(datacenter=d)
+            DatacenterClustersCount = len(clusters)
+            ZoneClustersCount = ZoneClustersCount + DatacenterClustersCount
+            GlobalClustersCount = GlobalClustersCount + ZoneClustersCount
 
             for c in clusters:
                 hosts = server.get_hosts()
-                HostsCount = len(hosts)
+                ClusterHostsCount = len(hosts)
+                DatacenterHostsCount = DatacenterHostsCount + ClusterHostsCount
+                ZoneHostsCount = ZoneHostsCount + DatacenterHostsCount
+                GlobalHostsCount = GlobalHostsCount + ZoneHostsCount
 
-                for host in hosts:
-                    #get host metrics here
+                for h, name in server.get_hosts().items():
+                    props = VIProperty(server, h)
+                    HostMemoryUsage = props.summary.quickStats.overallMemoryUsage
+                    HostCpuUsage = props.summary.quickStats.overallCpuUsage
+                    HostTotalMemory = props.hardware.memorySize
+
 
                 ClusterRunningVMS = server.get_registered_vms(cluster=c, status='poweredOn')
                 ClusterStoppedVMS = server.get_registered_vms(cluster=c, status='poweredOff')
@@ -85,9 +105,9 @@ def get_stats():
                 DatacenterStoppedVMS = DatacenterStoppedVMS + ClusterStoppedVMS
                 DatacenterTotalVMS = DatacenterTotalVMS + ClusterTotalVMS
             
-                metricnameClusterRunningVMS = METRIC_DELIM.join(datacenter.lower(), c.lower(), 'clusterrunningvms')
-                metricnameClusterStoppedVMS = METRIC_DELIM.join(datacenter.lower(), c.lower(), 'clusterstoppedvms')
-                metricnameClusterTotalVMS = METRIC_DELIM.join(datacenter.lower(), c.lower(), 'clustertotalvms')
+                metricnameClusterRunningVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'clusterrunningvms')
+                metricnameClusterStoppedVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'clusterstoppedvms')
+                metricnameClusterTotalVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'clustertotalvms')
             
                 try:
                     stats[metricnameClusterRunningVMS] = ClusterRunningVMS
@@ -102,9 +122,9 @@ def get_stats():
             ZoneStoppedVMS = ZoneStoppedVMS + DatacenterStoppedVMS
             ZoneTotalVMS = ZoneTotalVMS + DatacenterTotalVMS
 
-            metricnameDatacenterRunningVMS = METRIC_DELIM.join(datacenter.lower(), 'datacenterrunningvms')
-            metricnameDatacenterStoppedVMS = METRIC_DELIM.join(datacenter.lower(), 'datacenterstoppedvms')
-            metricnameDatacenterTotalVMS = METRIC_DELIM.join(datacenter.lower(), 'datacentertotalvms')
+            metricnameDatacenterRunningVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), 'datacenterrunningvms')
+            metricnameDatacenterStoppedVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), 'datacenterstoppedvms')
+            metricnameDatacenterTotalVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), 'datacentertotalvms')
 
             try:
                 stats[metricnameDatacenterRunningVMS] = DatacenterRunningVMS
@@ -114,9 +134,9 @@ def get_stats():
                 pass
 
         # post zone metrics count here    
-        metricnameZoneRunningVMS = METRIC_DELIM.join('zonerunningvms')
-        metricnameZoneStoppedVMS = METRIC_DELIM.join('zonestoppedvms')
-        metricnameZoneTotalVMS = METRIC_DELIM.join('zonetotalvms')
+        metricnameZoneRunningVMS = METRIC_DELIM.join(vcenter.lower(), 'zonerunningvms')
+        metricnameZoneStoppedVMS = METRIC_DELIM.join(vcenter.lower(), 'zonestoppedvms')
+        metricnameZoneTotalVMS = METRIC_DELIM.join(vcenter.lower(), 'zonetotalvms')
 
         try:
             stats[metricnameZoneRunningVMS] = ZoneRunningVMS
@@ -135,37 +155,53 @@ def get_stats():
             stats[metricnameDatacentersCount] = DatacentersCount
             stats[metricnameClustersCount] = ClustersCount
             stats[metricnameHostsCount] = HostsCount
-            except (TypeError, ValueError), e:
-                pass
-    
+        except (TypeError, ValueError), e:
+            pass
+   
+        GlobalRunningVMS = GlobalRunningVMS + ZoneRunningVMS 
+        GlobalStoppedVMS = GlobalStoppedVMS + ZoneStoppedVMS
+        GlobalTotalVMS = GlobalTotalVMS + ZoneTotalVMS
+
+        server.disconnect()
+
     #post global metrics here
-return stats	
+    metricnameGlobalRunningVMS = METRIC_DELIM.join('globalrunningvms')
+    metricnameGlobalStoppedVMS = METRIC_DELIM.join('globalstoppedvms')
+    metricnameGlobalTotalVMS = METRIC_DELIM.join('globaltotalvms')
+
+    try:
+        stats[metricnameGlobalRunningVMS] = GlobalRunningVMS
+        stats[metricnameGlobalStoppedVMS] = GlobalStoppedVMS
+        stats[metricnameGlobalTotalVMS] = GlobalTotalVMS
+    except (TypeError, ValueError), e:
+        pass 
+
+
+
+
+
+    return stats	
 
 # callback configuration for module
 def configure_callback(conf):
   global API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS, AUTH_MONITORS, VERBOSE_LOGGING
-  API_MONITORS = '' 
-  APIKEY_MONITORS = ''
-  SECRET_MONITORS = ''
-  AUTH_MONITORS = DEFAULT_AUTH
+  VCENTERLIST = '' 
+  USERNAME = ''
+  PASSWORD = ''
   VERBOSE_LOGGING = False
 
   for node in conf.children:
-    if node.key == "Api":
-      API_MONITORS = node.values[0]
-    elif node.key == "ApiKey":
-      APIKEY_MONITORS = node.values[0]
-    elif node.key == "Secret":
-      SECRET_MONITORS = node.values[0]
-    elif node.key == "Auth":
-      AUTH_MONITORS = node.values[0]
+    if node.key == "Vcenterlist":
+      VCENTERLIST = node.values[0]
+    elif node.key == "Username":
+      USERNAME = node.values[0]
+    elif node.key == "Password":
+      PASSWORD = node.values[0]
     elif node.key == "Verbose":
       VERBOSE_LOGGING = bool(node.values[0])
     else:
       logger('warn', 'Unknown config key: %s' % node.key)
 
-  if not API_MONITORS:
-    API_MONITORS += DEFAULT_API
 
 def read_callback():
   logger('verb', "beginning read_callback")
@@ -208,6 +244,7 @@ def logger(t, msg):
             collectd.info('%s: %s' % (NAME, msg))
     else:
         collectd.notice('%s: %s' % (NAME, msg))
+
 # main
 collectd.register_config(configure_callback)
 collectd.register_read(read_callback)
