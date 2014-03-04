@@ -304,7 +304,7 @@ def get_stats():
 
 # callback configuration for module
 def configure_callback(conf):
-  global API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS, AUTH_MONITORS, VERBOSE_LOGGING
+  global VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING
   VCENTERLIST = [] 
   USERNAME = ''
   PASSWORD = ''
