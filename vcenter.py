@@ -70,16 +70,16 @@ def get_stats():
     logger('verb', "get_stats calls vcenterlist %s user %s" % (VCENTERLIST, USERNAME))
     server = VIServer()
 
-    GlobalDatacentersCount = ''
-    GlobalClustersCount = ''
-    GlobalHostsCount = ''
-    GlobalRunningVMS = ''
-    GlobalStoppedVMS = ''
-    GlobalTotalVMS = ''
-    GlobalMemoryUsage = ''
-    GlobalCpuUsage = ''
-    GlobalTotalMemory = ''
-    GlobalCpuTotal = ''
+    GlobalDatacentersCount = 0
+    GlobalClustersCount = 0
+    GlobalHostsCount = 0
+    GlobalRunningVMS = 0
+    GlobalStoppedVMS = 0
+    GlobalTotalVMS = 0
+    GlobalMemoryUsage = 0
+    GlobalCpuUsage = 0
+    GlobalTotalMemory = 0
+    GlobalCpuTotal = 0
 
     for vcenter in VCENTERLIST:
         try:
@@ -88,16 +88,16 @@ def get_stats():
             logger('warn', "failed to connect to %s" % (vcenter))
             continue
          
-        ZoneDatacentersCount = ''
-        ZoneClustersCount = ''
-        ZoneHostsCount = ''
-        ZoneRunningVMS = ''
-        ZoneStoppedVMS = ''
-        ZoneTotalVMS = ''
-        ZoneMemoryUsage = ''
-        ZoneCpuUsage = ''
-        ZoneTotalMemory = ''
-        ZoneCpuTotal = ''
+        ZoneDatacentersCount = 0
+        ZoneClustersCount = 0
+        ZoneHostsCount = 0
+        ZoneRunningVMS = 0
+        ZoneStoppedVMS = 0
+        ZoneTotalVMS = 0
+        ZoneMemoryUsage = 0
+        ZoneCpuUsage = 0
+        ZoneTotalMemory = 0
+        ZoneCpuTotal = 0
 
 
         datacenters = server.get_datacenters()
@@ -106,15 +106,15 @@ def get_stats():
 
         for d in datacenters:
 
-            DatacenterRunningVMS = ''
-            DatacenterStoppedVMS = ''
-            DatacenterTotalVMS = ''
-            DatacenterClustersCount = ''
-            DatacenterHostsCount = ''
-            DatacenterMemoryUsage = ''
-            DatacenterCpuUsage = ''
-            DatacenterTotalMemory = ''
-            DatacenterCpuTotal = ''
+            DatacenterRunningVMS = 0
+            DatacenterStoppedVMS = 0
+            DatacenterTotalVMS = 0
+            DatacenterClustersCount = 0
+            DatacenterHostsCount = 0
+            DatacenterMemoryUsage = 0
+            DatacenterCpuUsage = 0
+            DatacenterTotalMemory = 0
+            DatacenterCpuTotal = 0
 
             clusters = server.get_clusters(datacenter=d)
             DatacenterClustersCount = len(clusters)
@@ -122,13 +122,13 @@ def get_stats():
             GlobalClustersCount = GlobalClustersCount + ZoneClustersCount
 
             for c in clusters:
-                ClusterMemoryUsage = ''
-                ClusterCpuUsage = ''
-                ClusterTotalMemory = ''
-                ClusterCpuTotal = ''
-                ClusterRunningVMS = ''
-                ClusterStoppedVMS = ''
-                ClusterTotalVMS = ''
+                ClusterMemoryUsage = 0
+                ClusterCpuUsage = 0
+                ClusterTotalMemory = 0
+                ClusterCpuTotal = 0
+                ClusterRunningVMS = 0
+                ClusterStoppedVMS = 0
+                ClusterTotalVMS = 0
 
                 hosts = server.get_hosts()
                 ClusterHostsCount = len(hosts)
@@ -148,13 +148,13 @@ def get_stats():
                     HostStoppedVMS = server.get_registered_vms(host=h, status='poweredOff')
                     HostTotalVMS = server.get_registered_vms(host=h)
                                
-                    metricnameHostMemoryUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostmemoryusage')
-                    metricnameHostCpuUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostcpuusage')
-                    metricnameHostTotalMemory = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hosttotalmemory')
-                    metricnameHostCpuTotal = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostcputotal')
-                    metricnameHostRunningVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostrunningVMS')
-                    metricnameHostStoppedVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hoststoppedVMS')
-                    metricnameHostTotalVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hosttotalVMS')
+                    metricnameHostMemoryUsage = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hostmemoryusage'])
+                    metricnameHostCpuUsage = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hostcpuusage'])
+                    metricnameHostTotalMemory = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hosttotalmemory'])
+                    metricnameHostCpuTotal = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hostcputotal'])
+                    metricnameHostRunningVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hostrunningVMS'])
+                    metricnameHostStoppedVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hoststoppedVMS'])
+                    metricnameHostTotalVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'hosttotalVMS'])
 
                     ClusterMemoryUsage = ClusterMemoryUsage + HostMemoryUsage
                     ClusterCpuUsage = ClusterCpuUsage + HostCpuUsage
@@ -184,13 +184,13 @@ def get_stats():
                 DatacenterTotalMemory = DatacenterTotalMemory + ClusterTotalMemory
                 DatacenterCpuTotal = DatacenterCpuTotal + ClusterCpuTotal
             
-                metricnameClusterRunningVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'clusterrunningvms')
-                metricnameClusterStoppedVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'clusterstoppedvms')
-                metricnameClusterTotalVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'clustertotalvms')
-                metricnameClusterMemoryUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'clustermemoryusage')
-                metricnameClusterCpuUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'clustercpuusage')
-                metricnameClusterTotalMemory = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'clustertotalmemory')
-                metricnameClusterCpuTotal = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'clustercputotal')
+                metricnameClusterRunningVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'clusterrunningvms'])
+                metricnameClusterStoppedVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'clusterstoppedvms'])
+                metricnameClusterTotalVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'clustertotalvms'])
+                metricnameClusterMemoryUsage = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'clustermemoryusage'])
+                metricnameClusterCpuUsage = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'clustercpuusage'])
+                metricnameClusterTotalMemory = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'clustertotalmemory'])
+                metricnameClusterCpuTotal = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), h.lower(), 'clustercputotal'])
             
                 try:
                     stats[metricnameClusterRunningVMS] = ClusterRunningVMS
@@ -213,13 +213,13 @@ def get_stats():
             ZoneTotalMemory = ZoneTotalMemory + DatacenterTotalMemory
             ZoneCpuTotal = ZoneCpuTotal + DatacenterCpuTotal
 
-            metricnameDatacenterRunningVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), 'datacenterrunningvms')
-            metricnameDatacenterStoppedVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), 'datacenterstoppedvms')
-            metricnameDatacenterTotalVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), 'datacentertotalvms')
-            metricnameDatacenterMemoryUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'datacentermemoryusage')
-            metricnameDatacenterCpuUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'datacentercpuusage')
-            metricnameDatacenterTotalMemory = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'datacentertotalmemory')
-            metricnameDatacenterCpuTotal = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), 'datacentercputotal')
+            metricnameDatacenterRunningVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), 'datacenterrunningvms'])
+            metricnameDatacenterStoppedVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), 'datacenterstoppedvms'])
+            metricnameDatacenterTotalVMS = METRIC_DELIM.join([vcenter.lower(), d.lower(), 'datacentertotalvms'])
+            metricnameDatacenterMemoryUsage = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'datacentermemoryusage'])
+            metricnameDatacenterCpuUsage = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'datacentercpuusage'])
+            metricnameDatacenterTotalMemory = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'datacentertotalmemory'])
+            metricnameDatacenterCpuTotal = METRIC_DELIM.join([vcenter.lower(), d.lower(), c.lower(), 'datacentercputotal'])
 
             try:
                 stats[metricnameDatacenterRunningVMS] = DatacenterRunningVMS
@@ -233,13 +233,13 @@ def get_stats():
                 pass
 
         # post zone metrics count here    
-        metricnameZoneRunningVMS = METRIC_DELIM.join(vcenter.lower(), 'zonerunningvms')
-        metricnameZoneStoppedVMS = METRIC_DELIM.join(vcenter.lower(), 'zonestoppedvms')
-        metricnameZoneTotalVMS = METRIC_DELIM.join(vcenter.lower(), 'zonetotalvms')
-        metricnameZoneMemoryUsage = METRIC_DELIM.join(vcenter.lower(), 'zonememoryusage')
-        metricnameZoneCpuUsage = METRIC_DELIM.join(vcenter.lower(), 'zonecpuusage')
-        metricnameZoneTotalMemory = METRIC_DELIM.join(vcenter.lower(), 'zonetotalmemory')
-        metricnameZoneCpuTotal = METRIC_DELIM.join(vcenter.lower(), 'zonecputotal')
+        metricnameZoneRunningVMS = METRIC_DELIM.join([vcenter.lower(), 'zonerunningvms'])
+        metricnameZoneStoppedVMS = METRIC_DELIM.join([vcenter.lower(), 'zonestoppedvms'])
+        metricnameZoneTotalVMS = METRIC_DELIM.join([vcenter.lower(), 'zonetotalvms'])
+        metricnameZoneMemoryUsage = METRIC_DELIM.join([vcenter.lower(), 'zonememoryusage'])
+        metricnameZoneCpuUsage = METRIC_DELIM.join([vcenter.lower(), 'zonecpuusage'])
+        metricnameZoneTotalMemory = METRIC_DELIM.join([vcenter.lower(), 'zonetotalmemory'])
+        metricnameZoneCpuTotal = METRIC_DELIM.join([vcenter.lower(), 'zonecputotal'])
 
         try:
             stats[metricnameZoneRunningVMS] = ZoneRunningVMS
