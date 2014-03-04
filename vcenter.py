@@ -35,6 +35,9 @@ METRIC_TYPES = {
     'hostcpuusage': ('h_cpu_usage', 'current'),
     'hosttotalmemory': ('h_total_memory', 'current'),
     'hostcputotal': ('h_cpu_total', 'current'),
+    'hostrunningVMS': ('c_vm_running', 'current'),
+    'hoststoppedVMS': ('c_vm_stopped', 'current'),
+    'hosttotalVMS': ('c_vm_total', 'current'),
     'zonerunningVMS': ('z_vm_running', 'current'),
     'zonestoppedVMS': ('z_vm_stopped', 'current'),
     'zonetotalVMS': ('z_vm_stopped', 'current'),
@@ -123,6 +126,9 @@ def get_stats():
                 ClusterCpuUsage = ''
                 ClusterTotalMemory = ''
                 ClusterCpuTotal = ''
+                ClusterRunningVMS = ''
+                ClusterStoppedVMS = ''
+                ClusterTotalVMS = ''
 
                 hosts = server.get_hosts()
                 ClusterHostsCount = len(hosts)
@@ -138,30 +144,38 @@ def get_stats():
                     HostNumCpuCores = props.summary.hardware.numCpuCores
                     HostMhzPerCore = props.summary.hardware.cpuMhz
                     HostCpuTotal = (HostNumCpuCores * HostMhzPerCore)
-                    
+                    HostRunningVMS = server.get_registered_vms(host=h, status='poweredOn')
+                    HostStoppedVMS = server.get_registered_vms(host=h, status='poweredOff')
+                    HostTotalVMS = server.get_registered_vms(host=h)
+                               
                     metricnameHostMemoryUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostmemoryusage')
                     metricnameHostCpuUsage = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostcpuusage')
                     metricnameHostTotalMemory = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hosttotalmemory')
                     metricnameHostCpuTotal = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostcputotal')
+                    metricnameHostRunningVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hostrunningVMS')
+                    metricnameHostStoppedVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hoststoppedVMS')
+                    metricnameHostTotalVMS = METRIC_DELIM.join(vcenter.lower(), datacenter.lower(), c.lower(), h.lower(), 'hosttotalVMS')
 
                     ClusterMemoryUsage = ClusterMemoryUsage + HostMemoryUsage
                     ClusterCpuUsage = ClusterCpuUsage + HostCpuUsage
                     ClusterTotalMemory = ClusterTotalMemory + HostTotalMemory
                     ClusterCpuTotal = ClusterCpuTotal + HostCpuTotal
+                    ClusterRunningVMS = ClusterRunningVMS + HostRunningVMS
+                    ClusterStoppedVMS = ClusterStoppedVMS + HostStoppedVMS
+                    ClusterTotalVMS = ClusterTotalVMS + HostTotalVMS
 
                     try:
                         stats[metricnameHostMemoryUsage] = HostMemoryUsage
                         stats[metricnameHostCpuUsage] = HostCpuUsage
                         stats[metricnameHostTotalMemory] = HostTotalMemory
                         stats[metricnameHostCpuTotal] = HostCpuTotal
+                        stats[metricnameHostRunningVMS] = HostRunningVMS
+                        stats[metricnameHostStoppedVMS] = HostStoppedVMS
+                        stats[metricnameHostTotalVMS] = HostTotalVMS
                     except (TypeError, ValueError), e:
                         pass
 
 
-
-                ClusterRunningVMS = server.get_registered_vms(cluster=c, status='poweredOn')
-                ClusterStoppedVMS = server.get_registered_vms(cluster=c, status='poweredOff')
-                ClusterTotalVMS = server.get_registered_vms(cluster=c)
                 DatacenterRunningVMS = DatacenterRunningVMS + ClusterRunningVMS
                 DatacenterStoppedVMS = DatacenterStoppedVMS + ClusterStoppedVMS
                 DatacenterTotalVMS = DatacenterTotalVMS + ClusterTotalVMS
@@ -291,7 +305,7 @@ def get_stats():
 # callback configuration for module
 def configure_callback(conf):
   global API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS, AUTH_MONITORS, VERBOSE_LOGGING
-  VCENTERLIST = '' 
+  VCENTERLIST = [] 
   USERNAME = ''
   PASSWORD = ''
   VERBOSE_LOGGING = False
