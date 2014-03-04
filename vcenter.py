@@ -305,15 +305,15 @@ def get_stats():
 # callback configuration for module
 def configure_callback(conf):
   global VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING
-  VCENTERLIST = [] 
+  VCENTERLIST = [gv1m-vw-vc01] 
   USERNAME = ''
   PASSWORD = ''
   VERBOSE_LOGGING = False
 
   for node in conf.children:
-    if node.key == "Vcenterlist":
-      VCENTERLIST = node.values[0]
-    elif node.key == "Username":
+    #if node.key == "Vcenterlist":
+    #  VCENTERLIST = node.values[0]
+    if node.key == "Username":
       USERNAME = node.values[0]
     elif node.key == "Password":
       PASSWORD = node.values[0]
