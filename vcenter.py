@@ -81,7 +81,7 @@ def get_stats():
     datacenters = server.get_datacenters()
     ZoneDatacentersCount = len(datacenters)
 
-    for d,dname in server.get_datacenters().items()::
+    for d,dname in server.get_datacenters().items():
 
         if "." in dname:
             dname = dname.split(".")[0]
@@ -100,7 +100,7 @@ def get_stats():
         DatacenterClustersCount = len(clusters)
         ZoneClustersCount = ZoneClustersCount + DatacenterClustersCount
 
-        for c,cname in server.get_clusters().items()::
+        for c,cname in server.get_clusters().items():
 
             if "." in cname:
                 cname = cname.split(".")[0]
