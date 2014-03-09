@@ -96,7 +96,7 @@ def get_stats():
         DatacenterTotalMemory = 0
         DatacenterCpuTotal = 0
 
-        clusters = server.get_clusters(datacenter=d)
+        clusters = server.get_clusters(d)
         DatacenterClustersCount = len(clusters)
         ZoneClustersCount = ZoneClustersCount + DatacenterClustersCount
 
@@ -113,7 +113,7 @@ def get_stats():
             ClusterStoppedVMS = 0
             ClusterTotalVMS = 0
 
-            hosts = server.get_hosts()
+            hosts = server.get_hosts(c)
             ClusterHostsCount = len(hosts)
             DatacenterHostsCount = DatacenterHostsCount + ClusterHostsCount
             ZoneHostsCount = ZoneHostsCount + DatacenterHostsCount
