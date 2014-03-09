@@ -80,7 +80,6 @@ def get_stats():
 
     datacenters = server.get_datacenters()
     ZoneDatacentersCount = len(datacenters)
-    GlobalDatacentersCount = GlobalDatacentersCount + ZoneDatacentersCount
 
     for d,dname in datacenters:
 
@@ -100,7 +99,6 @@ def get_stats():
         clusters = server.get_clusters(datacenter=d)
         DatacenterClustersCount = len(clusters)
         ZoneClustersCount = ZoneClustersCount + DatacenterClustersCount
-        GlobalClustersCount = GlobalClustersCount + ZoneClustersCount
 
         for c,cname in clusters:
 
@@ -119,7 +117,6 @@ def get_stats():
             ClusterHostsCount = len(hosts)
             DatacenterHostsCount = DatacenterHostsCount + ClusterHostsCount
             ZoneHostsCount = ZoneHostsCount + DatacenterHostsCount
-            GlobalHostsCount = GlobalHostsCount + ZoneHostsCount
 
             for h, hname in server.get_hosts().items():
                     
