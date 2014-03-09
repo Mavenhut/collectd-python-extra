@@ -130,9 +130,9 @@ def get_stats():
                 HostNumCpuCores = props.summary.hardware.numCpuCores
                 HostMhzPerCore = props.summary.hardware.cpuMhz
                 HostCpuTotal = (HostNumCpuCores * HostMhzPerCore)
-                HostRunningVMS = server.get_registered_vms(host=h, status='poweredOn')
-                HostStoppedVMS = server.get_registered_vms(host=h, status='poweredOff')
-                HostTotalVMS = server.get_registered_vms(host=h)
+                HostRunningVMS = server.get_registered_vms(h, status='poweredOn')
+                HostStoppedVMS = server.get_registered_vms(h, status='poweredOff')
+                HostTotalVMS = server.get_registered_vms(h)
                                
                 metricnameHostMemoryUsage = METRIC_DELIM.join([vcenter.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostmemoryusage'])
                 metricnameHostCpuUsage = METRIC_DELIM.join([vcenter.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcpuusage'])
