@@ -268,8 +268,8 @@ def configure_callback(conf):
   VERBOSE_LOGGING = False
 
   for node in conf.children:
-    #if node.key == "Vcenterlist":
-    #  VCENTERLIST = node.values[0]
+    if node.key == "Vcenter":
+      VCENTER = node.values[0]
     if node.key == "Username":
       USERNAME = node.values[0]
     elif node.key == "Password":
