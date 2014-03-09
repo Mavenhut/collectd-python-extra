@@ -240,14 +240,14 @@ def get_stats():
 
 
 
-    metricnameDatacentersCount = METRIC_DELIM.join('datacenters')
-    metricnameClustersCount = METRIC_DELIM.join('clusters')
-    metricnameHostsCount = METRIC_DELIM.join('hosts')
+    metricnameZoneDatacentersCount = METRIC_DELIM.join('zonedatacenterscount')
+    metricnameZoneClustersCount = METRIC_DELIM.join('zoneclusterscount')
+    metricnameZoneHostsCount = METRIC_DELIM.join('zonehostscount')
     
     try:
-        stats[metricnameDatacentersCount] = DatacentersCount
-        stats[metricnameClustersCount] = ClustersCount
-        stats[metricnameHostsCount] = HostsCount
+        stats[metricnameZoneDatacentersCount] = ZoneDatacentersCount
+        stats[metricnameZoneClustersCount] = ZoneClustersCount
+        stats[metricnameZoneHostsCount] = ZoneHostsCount
     except (TypeError, ValueError), e:
         pass
    
