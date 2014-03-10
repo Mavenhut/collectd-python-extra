@@ -4,6 +4,7 @@
 # Description : This is a collectd python module to gather stats from Vmware vcenters
 
 import collectd
+import time
 from pysphere import VIServer, VIProperty
         
         
@@ -207,7 +208,7 @@ def get_stats():
                     stats[metricnameHostCpuUsage] = HostCpuUsage
                     stats[metricnameHostTotalMemory] = HostTotalMemory
                     stats[metricnameHostCpuUsagePercent] = HostCpuUsagePercent
-                    stats[metricnameHostTotalMemoryPercent] = HostTotalMemoryPercent
+                    stats[metricnameHostMemoryPercent] = HostMemoryPercent
                     stats[metricnameHostCpuTotal] = HostCpuTotal
                     stats[metricnameHostRunningVMS] = HostRunningVMS
                     stats[metricnameHostStoppedVMS] = HostStoppedVMS
@@ -327,10 +328,11 @@ def get_stats():
 
 # callback configuration for module
 def configure_callback(conf):
-  global VCENTER, USERNAME, PASSWORD, VERBOSE_LOGGING
+  global VCENTER, USERNAME, PASSWORD, SLEEPTIME, VERBOSE_LOGGING
   VCENTER = ''
   USERNAME = ''
   PASSWORD = ''
+  SLEEPTIME = 3600
   VERBOSE_LOGGING = False
 
   for node in conf.children:
@@ -340,6 +342,8 @@ def configure_callback(conf):
       USERNAME = node.values[0]
     elif node.key == "Password":
       PASSWORD = node.values[0]
+    elif node.key == "Sleeptime":
+      SLEEPTIME = node.values[0]
     elif node.key == "Verbose":
       VERBOSE_LOGGING = bool(node.values[0])
     else:
