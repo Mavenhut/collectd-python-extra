@@ -19,10 +19,14 @@ METRIC_TYPES = {
     'zonehostscount': ('z_hosts_count', 'current'),
     'zonememoryusage': ('z_memory_usage', 'current'),
     'zonecpuusage': ('z_cpu_usage', 'current'),
+    'zonememoryusagepercent': ('z_memory_usage_percent', 'current'),
+    'zonecpuusagepercent': ('z_cpu_usage_percent', 'current'),
     'zonetotalmemory': ('z_total_memory', 'current'),
     'zonecputotal': ('z_cpu_total', 'current'),
     'hostmemoryusage': ('h_memory_usage', 'current'),
     'hostcpuusage': ('h_cpu_usage', 'current'),
+    'hostmemoryusagepercent': ('h_memory_usage_percent', 'current'),
+    'hostcpuusagepercent': ('h_cpu_usage_percent', 'current'),
     'hosttotalmemory': ('h_total_memory', 'current'),
     'hostcputotal': ('h_cpu_total', 'current'),
     'hostrunningvms': ('h_vm_running_count', 'current'),
@@ -39,6 +43,8 @@ METRIC_TYPES = {
     'datacentertotalvms': ('d_vm_total_count', 'current'),
     'datacentermemoryusage': ('d_memory_usage', 'current'),
     'datacentercpuusage': ('d_cpu_usage', 'current'),
+    'datacentermemoryusagepercent': ('d_memory_usage_percent', 'current'),
+    'datacentercpuusagepercent': ('d_cpu_usage_percent', 'current'),
     'datacentertotalmemory': ('d_total_memory', 'current'),
     'datacentercputotal': ('d_cpu_total_count', 'current'),
     'clusterrunningvms': ('c_vm_running_count', 'current'),
@@ -46,6 +52,8 @@ METRIC_TYPES = {
     'clustertotalvms': ('c_vm_total_count', 'current'),
     'clustermemoryusage': ('c_memory_usage', 'current'),
     'clustercpuusage': ('c_cpu_usage', 'current'),
+    'clustermemoryusagepercent': ('c_memory_usage_percent', 'current'),
+    'clustercpuusagepercent': ('c_cpu_usage_percent', 'current'),
     'clustertotalmemory': ('c_total_memory', 'current'),
     'clustercputotal': ('c_cpu_total', 'current'),
  
@@ -141,7 +149,7 @@ def get_stats():
                     logger('warn', "failed to get CPU usage value on %s" % (hname))
                 try:
                     logger('verb', "get_stats calls HostTotalMemory query on vcenter: %s for host: %s" % (VCENTER,hname))
-                    HostTotalMemory = props.summary.hardware.memorySize
+                    HostTotalMemory = (props.summary.hardware.memorySize/1048576)
                 except:
                     logger('warn', "failed to get Memory size value on %s" % (hname))
                 try:
@@ -171,7 +179,11 @@ def get_stats():
                     logger('warn', "failed to get all VMS count on %s" % (hname))
 
                 HostCpuTotal = (HostNumCpuCores * HostMhzPerCore)
-
+                HostMemoryUsagePercent = ((HostMemoryUsage * 100)/HostTotalMemory)
+                HostCpuUsagePercent = ((HostCpuUsage * 100)/HostCpuTotal)
+                
+                metricnameHostMemoryUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostmemoryusagepercent'])
+                metricnameHostCpuUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcpuusagepercent'])
                 metricnameHostMemoryUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostmemoryusage'])
                 metricnameHostCpuUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcpuusage'])
                 metricnameHostTotalMemory = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hosttotalmemory'])
@@ -187,11 +199,15 @@ def get_stats():
                 ClusterRunningVMS = ClusterRunningVMS + HostRunningVMS
                 ClusterStoppedVMS = ClusterStoppedVMS + HostStoppedVMS
                 ClusterTotalVMS = ClusterTotalVMS + HostTotalVMS
+                ClusterMemoryUsagePercent = ((ClusterMemoryUsage * 100)/ClusterTotalMemory)
+                ClusterCpuUsagePercent = ((ClusterCpuUsage * 100)/ClusterCpuTotal)
 
                 try:
                     stats[metricnameHostMemoryUsage] = HostMemoryUsage
                     stats[metricnameHostCpuUsage] = HostCpuUsage
                     stats[metricnameHostTotalMemory] = HostTotalMemory
+                    stats[metricnameHostCpuUsagePercent] = HostCpuUsagePercent
+                    stats[metricnameHostTotalMemoryPercent] = HostTotalMemoryPercent
                     stats[metricnameHostCpuTotal] = HostCpuTotal
                     stats[metricnameHostRunningVMS] = HostRunningVMS
                     stats[metricnameHostStoppedVMS] = HostStoppedVMS
@@ -207,6 +223,8 @@ def get_stats():
             DatacenterCpuUsage = DatacenterCpuUsage + ClusterCpuUsage
             DatacenterTotalMemory = DatacenterTotalMemory + ClusterTotalMemory
             DatacenterCpuTotal = DatacenterCpuTotal + ClusterCpuTotal
+            DatacenterMemoryUsagePercent = ((DatacenterMemoryUsage * 100)/DatacenterTotalMemory)
+            DatacenterCpuUsagePercent = ((DatacenterCpuUsage * 100)/DatacenterCpuTotal)
             
             metricnameClusterRunningVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clusterrunningvms'])
             metricnameClusterStoppedVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clusterstoppedvms'])
@@ -215,13 +233,16 @@ def get_stats():
             metricnameClusterCpuUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clustercpuusage'])
             metricnameClusterTotalMemory = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clustertotalmemory'])
             metricnameClusterCpuTotal = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clustercputotal'])
-            
+            metricnameClusterMemoryUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clustermemoryusagepercent'])
+            metricnameClusterCpuUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), 'clustercpuusagepercent'])
             try:
                 stats[metricnameClusterRunningVMS] = ClusterRunningVMS
                 stats[metricnameClusterStoppedVMS] = ClusterStoppedVMS
                 stats[metricnameClusterTotalVMS] = ClusterTotalVMS
                 stats[metricnameClusterMemoryUsage] = ClusterMemoryUsage 
                 stats[metricnameClusterCpuUsage] = ClusterCpuUsage
+                stats[metricnameClusterMemoryUsagePercent] = ClusterMemoryUsagePercent
+                stats[metricnameClusterCpuUsagePercent] = ClusterCpuUsagePercent
                 stats[metricnameClusterTotalMemory] = ClusterTotalMemory
                 stats[metricnameClusterCpuTotal] = ClusterCpuTotal
             except (TypeError, ValueError), e:
@@ -236,12 +257,16 @@ def get_stats():
         ZoneCpuUsage = ZoneCpuUsage + DatacenterCpuUsage
         ZoneTotalMemory = ZoneTotalMemory + DatacenterTotalMemory
         ZoneCpuTotal = ZoneCpuTotal + DatacenterCpuTotal
+        ZoneMemoryUsagePercent = ((ZoneMemoryUsage * 100)/ZoneTotalMemory)
+        ZoneCpuUsagePercent = ((ZoneCpuUsage * 100)/ZoneCpuTotal)
 
         metricnameDatacenterRunningVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacenterrunningvms'])
         metricnameDatacenterStoppedVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacenterstoppedvms'])
         metricnameDatacenterTotalVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentertotalvms'])
         metricnameDatacenterMemoryUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentermemoryusage'])
         metricnameDatacenterCpuUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentercpuusage'])
+        metricnameDatacenterMemoryUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentermemoryusagepercent'])
+        metricnameDatacenterCpuUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentercpuusagepercent'])
         metricnameDatacenterTotalMemory = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentertotalmemory'])
         metricnameDatacenterCpuTotal = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), 'datacentercputotal'])
 
@@ -251,6 +276,8 @@ def get_stats():
             stats[metricnameDatacenterTotalVMS] = DatacenterTotalVMS
             stats[metricnameDatacenterMemoryUsage] = DatacenterMemoryUsage
             stats[metricnameDatacenterCpuUsage] = DatacenterCpuUsage
+            stats[metricnameDatacenterMemoryUsagePercent] = DatacenterMemoryUsagePercent
+            stats[metricnameDatacenterCpuUsagePercent] = DatacenterCpuUsagePercent
             stats[metricnameDatacenterTotalMemory] = DatacenterTotalMemory
             stats[metricnameDatacenterCpuTotal] = DatacenterCpuTotal
         except (TypeError, ValueError), e:
@@ -262,6 +289,8 @@ def get_stats():
     metricnameZoneTotalVMS = METRIC_DELIM.join([VCENTER.lower(), 'zonetotalvms'])
     metricnameZoneMemoryUsage = METRIC_DELIM.join([VCENTER.lower(), 'zonememoryusage'])
     metricnameZoneCpuUsage = METRIC_DELIM.join([VCENTER.lower(), 'zonecpuusage'])
+    metricnameZoneMemoryUsagePercent = METRIC_DELIM.join([VCENTER.lower(), 'zonememoryusagepercent'])
+    metricnameZoneCpuUsagePercent = METRIC_DELIM.join([VCENTER.lower(), 'zonecpuusagepercent'])
     metricnameZoneTotalMemory = METRIC_DELIM.join([VCENTER.lower(), 'zonetotalmemory'])
     metricnameZoneCpuTotal = METRIC_DELIM.join([VCENTER.lower(), 'zonecputotal'])
 
@@ -271,6 +300,8 @@ def get_stats():
         stats[metricnameZoneTotalVMS] = ZoneTotalVMS
         stats[metricnameZoneMemoryUsage] = ZoneMemoryUsage
         stats[metricnameZoneCpuUsage] = ZoneCpuUsage
+        stats[metricnameZoneMemoryUsagePercent] = ZoneMemoryUsagePercent
+        stats[metricnameZoneCpuUsagePercent] = ZoneCpuUsagePercent
         stats[metricnameZoneTotalMemory] = ZoneTotalMemory
         stats[metricnameZoneCpuTotal] = ZoneCpuTotal
     except (TypeError, ValueError), e:
