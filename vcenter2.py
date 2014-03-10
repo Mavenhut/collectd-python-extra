@@ -57,7 +57,7 @@ METRIC_DELIM = '.'
 def get_stats():
     stats = dict()
 
-    logger('verb', "get_stats calls vcenterlist %s user %s" % (VCENTER, USERNAME))
+    logger('verb', "get_stats calls vcenter %s user %s" % (VCENTER, USERNAME))
     server = VIServer()
 
     try:
@@ -77,8 +77,9 @@ def get_stats():
     ZoneTotalMemory = 0
     ZoneCpuTotal = 0
 
-
+    logger('verb', "get_stats calls get_datacenters query on vcenter: %s" % (VCENTER))
     datacenters = server.get_datacenters()
+    logger('verb', "get_stats completed get_datacenters query on vcenter: %s" % (VCENTER))
     ZoneDatacentersCount = len(datacenters)
 
     for d,dname in server.get_datacenters().items():
@@ -96,7 +97,9 @@ def get_stats():
         DatacenterTotalMemory = 0
         DatacenterCpuTotal = 0
 
+        logger('verb', "get_stats calls get_clusters query on vcenter: %s for datacenter: %s" % (VCENTER,dname))
         clusters = server.get_clusters(d)
+        logger('verb', "get_stats completed get_clusters query on vcenter: %s for datacenter: %s" % (VCENTER,dname))
         DatacenterClustersCount = len(clusters)
         ZoneClustersCount = ZoneClustersCount + DatacenterClustersCount
 
@@ -113,7 +116,9 @@ def get_stats():
             ClusterStoppedVMS = 0
             ClusterTotalVMS = 0
 
+            logger('verb', "get_stats calls get_hosts query on vcenter: %s for cluster: %s" % (VCENTER,cname))
             hosts = server.get_hosts(c)
+            logger('verb', "get_stats completed get_hosts query on vcenter: %s for cluster: %s" % (VCENTER,cname))
             ClusterHostsCount = len(hosts)
             DatacenterHostsCount = DatacenterHostsCount + ClusterHostsCount
             ZoneHostsCount = ZoneHostsCount + DatacenterHostsCount
@@ -125,34 +130,42 @@ def get_stats():
 
                 props = VIProperty(server, h)
                 try:
+                    logger('verb', "get_stats calls HostMemoryUsage query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostMemoryUsage = props.summary.quickStats.overallMemoryUsage
                 except:
                     logger('warn', "failed to get Memory usage value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostCpuUsage query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostCpuUsage = props.summary.quickStats.overallCpuUsage
                 except:
                     logger('warn', "failed to get CPU usage value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostTotalMemory query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostTotalMemory = props.summary.hardware.memorySize
                 except:
                     logger('warn', "failed to get Memory size value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostNumCpuCores query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostNumCpuCores = props.summary.hardware.numCpuCores
                 except:
                     logger('warn', "failed to get Num of cores value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostMhzPerCore query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostMhzPerCore = props.summary.hardware.cpuMhz
                 except:
                     logger('warn', "failed to get CPU mhz value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostRunningVMS query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostRunningVMS = len(server.get_registered_vms(h, status='poweredOn'))
                 except:
                     logger('warn', "failed to get nb of running VMS value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostStoppedVMS query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostStoppedVMS = len(server.get_registered_vms(h, status='poweredOff'))
                 except:
                     logger('warn', "failed to get nb of stopped VMS value on %s" % (hname))
                 try:
+                    logger('verb', "get_stats calls HostTotalVMS query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostTotalVMS = len(server.get_registered_vms(h))
                 except:
                     logger('warn', "failed to get all VMS count on %s" % (hname))
