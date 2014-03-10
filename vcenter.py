@@ -30,13 +30,13 @@ METRIC_TYPES = {
     'hosttotalvms': ('c_vm_total', 'current'),
     'zonerunningvms': ('z_vm_running', 'current'),
     'zonestoppedvms': ('z_vm_stopped', 'current'),
-    'zonetotalvms': ('z_vm_stopped', 'current'),
+    'zonetotalvms': ('z_vm_total', 'current'),
     'datacenterclusterscount': ('d_clusters', 'current'),
     'datacenterhostscount': ('d_hosts', 'current'),
     'clussterhostscount': ('c_hosts', 'current'),
     'datacenterrunningvms': ('d_vm_running', 'current'),
     'datacenterstoppedvms': ('d_vm_stopped', 'current'),
-    'datacentertotalVMS': ('d_vm_total', 'current'),
+    'datacentertotalvms': ('d_vm_total', 'current'),
     'datacentermemoryusage': ('d_memory_usage', 'current'),
     'datacentercpuusage': ('d_cpu_usage', 'current'),
     'datacentertotalmemory': ('d_total_memory', 'current'),
@@ -240,9 +240,9 @@ def get_stats():
 
 
 
-    metricnameZoneDatacentersCount = METRIC_DELIM.join('zonedatacenterscount')
-    metricnameZoneClustersCount = METRIC_DELIM.join('zoneclusterscount')
-    metricnameZoneHostsCount = METRIC_DELIM.join('zonehostscount')
+    metricnameZoneDatacentersCount = METRIC_DELIM.join([VCENTER.lower(), 'zonedatacenterscount'])
+    metricnameZoneClustersCount = METRIC_DELIM.join([VCENTER.lower(),'zoneclusterscount'])
+    metricnameZoneHostsCount = METRIC_DELIM.join([VCENTER.lower(),'zonehostscount'])
     
     try:
         stats[metricnameZoneDatacentersCount] = ZoneDatacentersCount
