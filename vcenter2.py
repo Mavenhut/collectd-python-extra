@@ -124,16 +124,41 @@ def get_stats():
                     hname = hname.split(".")[0]
 
                 props = VIProperty(server, h)
-                HostMemoryUsage = props.summary.quickStats.overallMemoryUsage
-                HostCpuUsage = props.summary.quickStats.overallCpuUsage
-                HostTotalMemory = props.summary.hardware.memorySize
-                HostNumCpuCores = props.summary.hardware.numCpuCores
-                HostMhzPerCore = props.summary.hardware.cpuMhz
+                try:
+                    HostMemoryUsage = props.summary.quickStats.overallMemoryUsage
+                except:
+                    logger('warn', "failed to get Memory usage value on %s" % (hname))
+                try:
+                    HostCpuUsage = props.summary.quickStats.overallCpuUsage
+                except:
+                    logger('warn', "failed to get CPU usage value on %s" % (hname))
+                try:
+                    HostTotalMemory = props.summary.hardware.memorySize
+                except:
+                    logger('warn', "failed to get Memory size value on %s" % (hname))
+                try:
+                    HostNumCpuCores = props.summary.hardware.numCpuCores
+                except:
+                    logger('warn', "failed to get Num of cores value on %s" % (hname))
+                try:
+                    HostMhzPerCore = props.summary.hardware.cpuMhz
+                except:
+                    logger('warn', "failed to get CPU mhz value on %s" % (hname))
+                try:
+                    HostRunningVMS = len(server.get_registered_vms(h, status='poweredOn'))
+                except:
+                    logger('warn', "failed to get nb of running VMS value on %s" % (hname))
+                try:
+                    HostStoppedVMS = len(server.get_registered_vms(h, status='poweredOff'))
+                except:
+                    logger('warn', "failed to get nb of stopped VMS value on %s" % (hname))
+                try:
+                    HostTotalVMS = len(server.get_registered_vms(h))
+                except:
+                    logger('warn', "failed to get all VMS count on %s" % (hname))
+
                 HostCpuTotal = (HostNumCpuCores * HostMhzPerCore)
-                HostRunningVMS = len(server.get_registered_vms(h, status='poweredOn'))
-                HostStoppedVMS = len(server.get_registered_vms(h, status='poweredOff'))
-                HostTotalVMS = len(server.get_registered_vms(h))
-                               
+
                 metricnameHostMemoryUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostmemoryusage'])
                 metricnameHostCpuUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcpuusage'])
                 metricnameHostTotalMemory = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hosttotalmemory'])
