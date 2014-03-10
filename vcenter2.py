@@ -324,7 +324,7 @@ def get_stats():
 
     server.disconnect()
 
-    return stats	
+    return stats
 
 # callback configuration for module
 def configure_callback(conf):
@@ -379,7 +379,7 @@ def read_callback():
     val.values = [ value ]
     val.dispatch()
 
-
+    time.sleep(SLEEPTIME)
 # logging function
 def logger(t, msg):
     if t == 'err':
