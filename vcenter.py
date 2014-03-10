@@ -138,9 +138,9 @@ def get_stats():
                 metricnameHostCpuUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcpuusage'])
                 metricnameHostTotalMemory = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hosttotalmemory'])
                 metricnameHostCpuTotal = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcputotal'])
-                metricnameHostRunningVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostrunningVMS'])
-                metricnameHostStoppedVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hoststoppedVMS'])
-                metricnameHostTotalVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hosttotalVMS'])
+                metricnameHostRunningVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostrunningvms'])
+                metricnameHostStoppedVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hoststoppedvms'])
+                metricnameHostTotalVMS = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hosttotalvms'])
 
                 ClusterMemoryUsage = ClusterMemoryUsage + HostMemoryUsage
                 ClusterCpuUsage = ClusterCpuUsage + HostCpuUsage
