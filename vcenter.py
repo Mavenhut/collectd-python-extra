@@ -208,7 +208,7 @@ def get_stats():
                     stats[metricnameHostCpuUsage] = HostCpuUsage
                     stats[metricnameHostTotalMemory] = HostTotalMemory
                     stats[metricnameHostCpuUsagePercent] = HostCpuUsagePercent
-                    stats[metricnameHostMemoryPercent] = HostMemoryPercent
+                    stats[metricnameHostMemoryUsagePercent] = HostMemoryUsagePercent
                     stats[metricnameHostCpuTotal] = HostCpuTotal
                     stats[metricnameHostRunningVMS] = HostRunningVMS
                     stats[metricnameHostStoppedVMS] = HostStoppedVMS
