@@ -167,6 +167,8 @@ def get_stats():
                                 HostStatus = 0
                             else:
                                 HostStatus = 1
+                except:
+                    logger('warn', "failed to get Host CPU and Memory metrics value on vcenter: %s for host: %s" % (VCENTER,hname))
 
                 try:
                     logger('verb', "get_stats calls HostRunningVMS query on vcenter: %s for host: %s" % (VCENTER,hname))
