@@ -4,8 +4,7 @@
 # Description : This is a collectd python module to gather stats from Vmware vcenters
 
 import collectd
-import time
-from pysphere import VIServer, VIProperty
+from pysphere import VIServer
         
         
         
@@ -24,6 +23,7 @@ METRIC_TYPES = {
     'zonecpuusagepercent': ('z_cpu_usage_percent', 'current'),
     'zonetotalmemory': ('z_total_memory', 'current'),
     'zonecputotal': ('z_cpu_total', 'current'),
+    'hoststatus': ('h_status', 'current'),
     'hostmemoryusage': ('h_memory_usage', 'current'),
     'hostcpuusage': ('h_cpu_usage', 'current'),
     'hostmemoryusagepercent': ('h_memory_usage_percent', 'current'),
@@ -133,36 +133,45 @@ def get_stats():
             ZoneHostsCount = ZoneHostsCount + DatacenterHostsCount
 
             for h, hname in server.get_hosts().items():
+                
+                HostMemoryUsage = 0
+                HostCpuUsage = 0
+                HostTotalMemory = 0
+                HostNumCpuCores = 0
+                HostMhzPerCore = 0
+                HostStatus = ''
                     
                 if "." in hname:
                     hname = hname.split(".")[0]
 
-                props = VIProperty(server, h)
                 try:
-                    logger('verb', "get_stats calls HostMemoryUsage query on vcenter: %s for host: %s" % (VCENTER,hname))
-                    HostMemoryUsage = props.summary.quickStats.overallMemoryUsage
+                    logger('verb', "get_stats calls Host CPU and Memory metrics query on vcenter: %s for host: %s" % (VCENTER,hname))
+                
+                    props = server._retrieve_properties_traversal(property_names=['name', 'summary.overallStatus', 'summary.quickStats.overallMemoryUsage', 'summary.quickStats.overallCpuUsage','summary.hardware.memorySize', 'summary.hardware.numCpuCores', 'summary.hardware.cpuMhz'],from_node=h ,obj_type="HostSystem")
+
+
+                    for prop_set in props:
+                        #mor = prop_set.Obj #in case you need it
+                        for prop in prop_set.PropSet:
+                            if prop.Name == "summary.quickStats.overallMemoryUsage": 
+                                HostMemoryUsage  = prop.Val
+                            elif prop.Name == "summary.quickStats.overallCpuUsage": 
+                                HostCpuUsage = prop.Val
+                            elif prop.Name == "summary.hardware.memorySize": 
+                                HostTotalMemory = (prop.Val/1048576)
+                            elif prop.Name == "summary.hardware.numCpuCores":
+                                HostNumCpuCores = prop.Val
+                            elif prop.Name == "summary.hardware.cpuMhz":
+                                HostMhzPerCore = prop.Val
+                            elif prop.Name == "summary.overallStatus":
+                                HostStatus = prop.Val
+                                if HostStatus == "green":
+                                    HostStatus = 0
+                                else:
+                                    HostStatus = 1
                 except:
-                    logger('warn', "failed to get Memory usage value on %s" % (hname))
-                try:
-                    logger('verb', "get_stats calls HostCpuUsage query on vcenter: %s for host: %s" % (VCENTER,hname))
-                    HostCpuUsage = props.summary.quickStats.overallCpuUsage
-                except:
-                    logger('warn', "failed to get CPU usage value on %s" % (hname))
-                try:
-                    logger('verb', "get_stats calls HostTotalMemory query on vcenter: %s for host: %s" % (VCENTER,hname))
-                    HostTotalMemory = (props.summary.hardware.memorySize/1048576)
-                except:
-                    logger('warn', "failed to get Memory size value on %s" % (hname))
-                try:
-                    logger('verb', "get_stats calls HostNumCpuCores query on vcenter: %s for host: %s" % (VCENTER,hname))
-                    HostNumCpuCores = props.summary.hardware.numCpuCores
-                except:
-                    logger('warn', "failed to get Num of cores value on %s" % (hname))
-                try:
-                    logger('verb', "get_stats calls HostMhzPerCore query on vcenter: %s for host: %s" % (VCENTER,hname))
-                    HostMhzPerCore = props.summary.hardware.cpuMhz
-                except:
-                    logger('warn', "failed to get CPU mhz value on %s" % (hname))
+                    logger('warn', "failed to get Host CPU and Memory metrics value on vcenter: %s for host: %s" % (VCENTER,hname))
+
                 try:
                     logger('verb', "get_stats calls HostRunningVMS query on vcenter: %s for host: %s" % (VCENTER,hname))
                     HostRunningVMS = len(server.get_registered_vms(h, status='poweredOn'))
@@ -183,6 +192,7 @@ def get_stats():
                 HostMemoryUsagePercent = ((HostMemoryUsage * 100)/HostTotalMemory)
                 HostCpuUsagePercent = ((HostCpuUsage * 100)/HostCpuTotal)
                 
+                metricnameHostStatus = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hoststatus'])
                 metricnameHostMemoryUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostmemoryusagepercent'])
                 metricnameHostCpuUsagePercent = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostcpuusagepercent'])
                 metricnameHostMemoryUsage = METRIC_DELIM.join([VCENTER.lower(), dname.lower(), cname.lower(), hname.lower(), 'hostmemoryusage'])
@@ -204,6 +214,7 @@ def get_stats():
                 ClusterCpuUsagePercent = ((ClusterCpuUsage * 100)/ClusterCpuTotal)
 
                 try:
+                    stats[metricnameHostStatus] = HostStatus
                     stats[metricnameHostMemoryUsage] = HostMemoryUsage
                     stats[metricnameHostCpuUsage] = HostCpuUsage
                     stats[metricnameHostTotalMemory] = HostTotalMemory
@@ -332,7 +343,6 @@ def configure_callback(conf):
   VCENTER = ''
   USERNAME = ''
   PASSWORD = ''
-  SLEEPTIME = 3600
   VERBOSE_LOGGING = False
 
   for node in conf.children:
@@ -342,8 +352,6 @@ def configure_callback(conf):
       USERNAME = node.values[0]
     elif node.key == "Password":
       PASSWORD = node.values[0]
-    elif node.key == "Sleeptime":
-      SLEEPTIME = node.values[0]
     elif node.key == "Verbose":
       VERBOSE_LOGGING = bool(node.values[0])
     else:
@@ -379,7 +387,6 @@ def read_callback():
     val.values = [ value ]
     val.dispatch()
 
-    time.sleep(SLEEPTIME)
 # logging function
 def logger(t, msg):
     if t == 'err':
