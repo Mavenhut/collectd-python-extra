@@ -87,7 +87,7 @@ def get_stats():
     ZoneCpuTotal = 0
 
     logger('verb', "get_stats calls get_datacenters query on vcenter: %s" % (VCENTER))
-    datacenters = server.get_datacenters()
+    #datacenters = server.get_datacenters()
     logger('verb', "get_stats completed get_datacenters query on vcenter: %s" % (VCENTER))
     ZoneDatacentersCount = len(datacenters)
 
@@ -107,12 +107,12 @@ def get_stats():
         DatacenterCpuTotal = 0
 
         logger('verb', "get_stats calls get_clusters query on vcenter: %s for datacenter: %s" % (VCENTER,dname))
-        clusters = server.get_clusters(d)
+        #clusters = server.get_clusters(d)
         logger('verb', "get_stats completed get_clusters query on vcenter: %s for datacenter: %s" % (VCENTER,dname))
         DatacenterClustersCount = len(clusters)
         ZoneClustersCount = ZoneClustersCount + DatacenterClustersCount
 
-        for c,cname in server.get_clusters().items():
+        for c,cname in server.get_clusters(d).items():
 
             if "." in cname:
                 cname = cname.split(".")[0]
@@ -132,7 +132,7 @@ def get_stats():
             DatacenterHostsCount = DatacenterHostsCount + ClusterHostsCount
             ZoneHostsCount = ZoneHostsCount + DatacenterHostsCount
 
-            for h, hname in server.get_hosts().items():
+            for h, hname in server.get_hosts(c).items():
                 
                 HostMemoryUsage = 0
                 HostCpuUsage = 0
