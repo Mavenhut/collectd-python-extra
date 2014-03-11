@@ -150,23 +150,25 @@ def get_stats():
                     props = server._retrieve_properties_traversal(property_names=['name', 'summary.overallStatus', 'summary.quickStats.overallMemoryUsage', 'summary.quickStats.overallCpuUsage','summary.hardware.memorySize', 'summary.hardware.numCpuCores', 'summary.hardware.cpuMhz'],from_node=h ,obj_type="HostSystem")
 
 
-                    for prop in propset.PropSet:
-                        if prop.Name == "summary.quickStats.overallMemoryUsage": 
-                            HostMemoryUsage  = prop.Val
-                        elif prop.Name == "summary.quickStats.overallCpuUsage": 
-                            HostCpuUsage = prop.Val
-                        elif prop.Name == "summary.hardware.memorySize": 
-                            HostTotalMemory = (prop.Val/1048576)
-                        elif prop.Name == "summary.hardware.numCpuCores":
-                            HostNumCpuCores = prop.Val
-                        elif prop.Name == "summary.hardware.cpuMhz":
-                            HostMhzPerCore = prop.Val
-                        elif prop.Name == "summary.overallStatus":
-                            HostStatus = prop.Val
-                            if HostStatus == "green":
-                                HostStatus = 0
-                            else:
-                                HostStatus = 1
+                    for prop_set in props:
+                        #mor = prop_set.Obj #in case you need it
+                        for prop in prop_set.PropSet:
+                            if prop.Name == "summary.quickStats.overallMemoryUsage": 
+                                HostMemoryUsage  = prop.Val
+                            elif prop.Name == "summary.quickStats.overallCpuUsage": 
+                                HostCpuUsage = prop.Val
+                            elif prop.Name == "summary.hardware.memorySize": 
+                                HostTotalMemory = (prop.Val/1048576)
+                            elif prop.Name == "summary.hardware.numCpuCores":
+                                HostNumCpuCores = prop.Val
+                            elif prop.Name == "summary.hardware.cpuMhz":
+                                HostMhzPerCore = prop.Val
+                            elif prop.Name == "summary.overallStatus":
+                                HostStatus = prop.Val
+                                if HostStatus == "green":
+                                    HostStatus = 0
+                                else:
+                                    HostStatus = 1
                 except:
                     logger('warn', "failed to get Host CPU and Memory metrics value on vcenter: %s for host: %s" % (VCENTER,hname))
 
