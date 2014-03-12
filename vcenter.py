@@ -104,12 +104,12 @@ def get_stats():
         metricnameZoneDatastoreFreespace = METRIC_DELIM.join([VCENTER.lower(), "datastores", dsname.lower(), 'datastorefreespace'])
         metricnameZoneDatastoreUsagePercent = METRIC_DELIM.join([VCENTER.lower(), "datastores", dsname.lower(), 'datastoreusagepercent'])
 
-    try:
-        stats[metricnameZoneDatastoreCapacity] = DatastoreCapacity
-        stats[metricnameZoneDatastoreFreespace] = DatastoreFreespace
-        stats[metricnameZoneDatastoreUsagePercent] = DatastoreUsagePercent
-    except (TypeError, ValueError), e:
-        pass        
+        try:
+            stats[metricnameZoneDatastoreCapacity] = DatastoreCapacity
+            stats[metricnameZoneDatastoreFreespace] = DatastoreFreespace
+            stats[metricnameZoneDatastoreUsagePercent] = DatastoreUsagePercent
+        except (TypeError, ValueError), e:
+            pass        
 
     ZoneDatacentersCount = 0
     ZoneClustersCount = 0
