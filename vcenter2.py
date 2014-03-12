@@ -11,23 +11,24 @@ from pysphere import VIServer
 NAME = 'Vcenter'
 
 
-
-
 METRIC_TYPES = {
+    'datastorecapacity': ('z_dscapacity', 'current'),
+    'datastorefreespace': ('z_dsfreespace', 'current'),
+    'datastoreusagepercent': ('z_dsusage_pct', 'current'),
     'zonedatacenterscount': ('z_datacenters_count', 'current'),
     'zoneclusterscount': ('z_clusters_count', 'current'),
     'zonehostscount': ('z_hosts_count', 'current'),
     'zonememoryusage': ('z_memory_usage', 'current'),
     'zonecpuusage': ('z_cpu_usage', 'current'),
-    'zonememoryusagepercent': ('z_memory_usage_percent', 'current'),
-    'zonecpuusagepercent': ('z_cpu_usage_percent', 'current'),
+    'zonememoryusagepercent': ('z_memory_usage_pct', 'current'),
+    'zonecpuusagepercent': ('z_cpu_usage_pct', 'current'),
     'zonetotalmemory': ('z_total_memory', 'current'),
     'zonecputotal': ('z_cpu_total', 'current'),
     'hoststatus': ('h_status', 'current'),
     'hostmemoryusage': ('h_memory_usage', 'current'),
     'hostcpuusage': ('h_cpu_usage', 'current'),
-    'hostmemoryusagepercent': ('h_memory_usage_percent', 'current'),
-    'hostcpuusagepercent': ('h_cpu_usage_percent', 'current'),
+    'hostmemoryusagepercent': ('h_memory_usage_pct', 'current'),
+    'hostcpuusagepercent': ('h_cpu_usage_pct', 'current'),
     'hosttotalmemory': ('h_total_memory', 'current'),
     'hostcputotal': ('h_cpu_total', 'current'),
     'hostrunningvms': ('h_vm_running_count', 'current'),
@@ -44,8 +45,8 @@ METRIC_TYPES = {
     'datacentertotalvms': ('d_vm_total_count', 'current'),
     'datacentermemoryusage': ('d_memory_usage', 'current'),
     'datacentercpuusage': ('d_cpu_usage', 'current'),
-    'datacentermemoryusagepercent': ('d_memory_usage_percent', 'current'),
-    'datacentercpuusagepercent': ('d_cpu_usage_percent', 'current'),
+    'datacentermemoryusagepercent': ('d_memory_usage_pct', 'current'),
+    'datacentercpuusagepercent': ('d_cpu_usage_pct', 'current'),
     'datacentertotalmemory': ('d_total_memory', 'current'),
     'datacentercputotal': ('d_cpu_total_count', 'current'),
     'clusterrunningvms': ('c_vm_running_count', 'current'),
@@ -74,7 +75,42 @@ def get_stats():
     except:
         logger('warn', "failed to connect to %s" % (VCENTER))
         quit()
-         
+    
+    #get datastores
+    for ds, dsname in server.get_datastores().items():
+
+        DatastoreCapacity = 0
+        DatastoreFreespace = 0
+        DatastoreUsagePercent = 0
+
+        try:
+            logger('verb', "get_stats calls Datastore metrics query on vcenter: %s for datastore: %s" % (VCENTER,dsname))
+
+            props = server._retrieve_properties_traversal(property_names=['name', 'summary.capacity', 'summary.freeSpace'],from_node=ds,obj_type="Datastore")
+
+            for prop_set in props:
+                #mor = prop_set.Obj #in case you need it
+                    for prop in prop_set.PropSet:
+                        if prop.Name == "summary.capacity":
+                            DatastoreCapacity = (prop.Val/1048576)
+                        elif prop.Name == "summary.freeSpace":
+                            DatastoreFreespace = (prop.Val/1048576)
+        except:
+            logger('warn', "failed to get Datastore metrics value on vcenter: %s for datastore: %s" % (VCENTER,dsname))
+
+        DatastoreUsagePercent = (((DatastoreCapacity - DatastoreFreespace) * 100)/DatastoreCapacity)
+
+        metricnameZoneDatastoreCapacity = METRIC_DELIM.join([VCENTER.lower(), "datastores",  dsname.lower(), 'datastorecapacity'])
+        metricnameZoneDatastoreFreespace = METRIC_DELIM.join([VCENTER.lower(), "datastores", dsname.lower(), 'datastorefreespace'])
+        metricnameZoneDatastoreUsagePercent = METRIC_DELIM.join([VCENTER.lower(), "datastores", dsname.lower(), 'datastoreusagepercent'])
+
+    try:
+        stats[metricnameZoneDatastoreCapacity] = DatastoreCapacity
+        stats[metricnameZoneDatastoreFreespace] = DatastoreFreespace
+        stats[metricnameZoneDatastoreUsagePercent] = DatastoreUsagePercent
+    except (TypeError, ValueError), e:
+        pass        
+
     ZoneDatacentersCount = 0
     ZoneClustersCount = 0
     ZoneHostsCount = 0
@@ -167,8 +203,12 @@ def get_stats():
                                 HostStatus = prop.Val
                                 if HostStatus == "green":
                                     HostStatus = 0
-                                else:
+                                elif HostStatus == "gray":
                                     HostStatus = 1
+                                elif HostStatus == "yellow":
+                                    HostStatus = 2
+                                elif HostStatus == "red":
+                                    HostStatus = 3
                 except:
                     logger('warn', "failed to get Host CPU and Memory metrics value on vcenter: %s for host: %s" % (VCENTER,hname))
 
