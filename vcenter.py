@@ -75,7 +75,7 @@ def get_stats():
             server.connect(vcenter, USERNAME, PASSWORD)
         except:
             logger('warn', "failed to connect to %s" % (vcenter))
-            quit()
+            continue
         
         #get datastores
         for ds, dsname in server.get_datastores().items():
