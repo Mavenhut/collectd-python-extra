@@ -7,9 +7,14 @@ import collectd
 import time
 from pysphere import VIServer
         
-        
-NAME = 'Vcenter'
 
+global VCENTER, USERNAME, PASSWORD, SLEEPTIME, VERBOSE_LOGGING
+NAME = 'Vcenter'
+VCENTER = ''
+USERNAME = ''
+PASSWORD = ''
+SLEEPTIME = 300
+VERBOSE_LOGGING = False
 
 METRIC_TYPES = {
     'datastorecapacity': ('z_dscapacity', 'current'),
@@ -377,14 +382,10 @@ def get_stats():
 
     return stats
 
+
+
 # callback configuration for module
 def configure_callback(conf):
-  global VCENTER, USERNAME, PASSWORD, SLEEPTIME, VERBOSE_LOGGING
-  VCENTER = ''
-  USERNAME = ''
-  PASSWORD = ''
-  SLEEPTIME = 300
-  VERBOSE_LOGGING = False
 
   for node in conf.children:
     if node.key == "Vcenter":
