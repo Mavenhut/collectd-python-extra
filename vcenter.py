@@ -1,7 +1,7 @@
-# collectd-cloudstack - cloudstack.py
+# collectd-vcenter - vcenter.py
 #
 # Author : Loic Lambiel @ exoscale
-# Description : This is a collectd python module to gather stats from Vmware vcenters
+# Description : This is a collectd python module to gather stats from Vmware vcenter
 
 import collectd
 from pysphere import VIServer
