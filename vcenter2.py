@@ -4,8 +4,8 @@
 # Description : This is a collectd python module to gather stats from Vmware vcenters
 
 import collectd
+import time
 from pysphere import VIServer
-from time import sleep        
         
         
 NAME = 'Vcenter'
