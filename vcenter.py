@@ -5,7 +5,7 @@
 
 import collectd
 from pysphere import VIServer
-        
+from time import sleep        
         
         
 NAME = 'Vcenter'
@@ -383,15 +383,18 @@ def configure_callback(conf):
   VCENTER = ''
   USERNAME = ''
   PASSWORD = ''
+  SLEEPTIME = 300
   VERBOSE_LOGGING = False
 
   for node in conf.children:
     if node.key == "Vcenter":
       VCENTER = node.values[0]
-    if node.key == "Username":
+    elif node.key == "Username":
       USERNAME = node.values[0]
     elif node.key == "Password":
       PASSWORD = node.values[0]
+    elif node.key == "Sleeptime":
+      SLEEPTIME = node.values[0]
     elif node.key == "Verbose":
       VERBOSE_LOGGING = bool(node.values[0])
     else:
@@ -442,3 +445,4 @@ def logger(t, msg):
 # main
 collectd.register_config(configure_callback)
 collectd.register_read(read_callback)
+time.sleep(SLEEPTIME)
