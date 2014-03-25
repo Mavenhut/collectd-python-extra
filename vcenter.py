@@ -431,6 +431,8 @@ def read_callback():
     val.values = [ value ]
     val.dispatch()
 
+    time.sleep(SLEEPTIME)
+
 # logging function
 def logger(t, msg):
     if t == 'err':
@@ -446,4 +448,3 @@ def logger(t, msg):
 # main
 collectd.register_config(configure_callback)
 collectd.register_read(read_callback)
-time.sleep(SLEEPTIME)
