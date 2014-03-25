@@ -5,7 +5,7 @@
 
 import collectd
 from pysphere import VIServer
-        
+import time        
 
 
 METRIC_TYPES = {
@@ -375,7 +375,7 @@ def get_stats():
        
 
         server.disconnect()
-
+    time.sleep(SLEEPTIME)
     return stats
 
 
@@ -383,8 +383,9 @@ def get_stats():
 # callback configuration for module
 def configure_callback(conf):
 
-  global NAME, VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING
+  global NAME, SLEEPTIME, VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING
   NAME = 'Vcenter'
+  SLEEPTIME = 120
   VCENTERLIST = ''
   USERNAME = ''
   PASSWORD = ''
