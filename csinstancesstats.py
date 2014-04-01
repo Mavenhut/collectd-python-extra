@@ -8,6 +8,7 @@
 
 import MySQLdb
 import sys
+import time
 
 SLEEPTIME = 120
 
@@ -16,7 +17,7 @@ def get_nb_instances(dbhost,user,pwd,database):
     logger('error', "empty parameter, dbhost: %s , user: %s , pwd: %s , database: %s" % (dbhost,user,pwd,database))
     sys.exit(1)
   try:
-    QUERYNBINSTANCES="SELECT id FROM cloud.vm_instance where type like 'User';" % (d2,d1)
+    QUERYNBINSTANCES="SELECT id FROM cloud.vm_instance where type like 'User';"
     con = MySQLdb.connect(dbhost, user, pwd, database)
     cursor = con.cursor()
     cursor.execute(QUERYNBINSTANCES)
