@@ -10,7 +10,7 @@ import MySQLdb
 import sys
 import time
 
-SLEEPTIME = 120
+SLEEPTIME = 300
 
 def get_nb_instances(dbhost,user,pwd,database):
   if not (dbhost and user and pwd and database):
