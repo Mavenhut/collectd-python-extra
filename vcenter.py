@@ -385,7 +385,7 @@ def configure_callback(conf):
 
   global NAME, SLEEPTIME, VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING
   NAME = 'Vcenter'
-  SLEEPTIME = 120
+  SLEEPTIME = 300
   VCENTERLIST = ''
   USERNAME = ''
   PASSWORD = ''
