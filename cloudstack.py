@@ -12,6 +12,7 @@ import hmac
 import base64
 import hashlib
 import re
+import time
 
 class BaseClient(object):
     def __init__(self, api, apikey, secret):
@@ -534,17 +535,18 @@ def get_stats():
                 stats[metricnameCapaZoneDiskAllocUsed] = c['capacityused']
                 stats[metricnameCapaZoneDiskAllocPercentUsed] = c['percentused']
 
-  
+  time.sleep(SLEEPTIME)  
   return stats	
 
 # callback configuration for module
 def configure_callback(conf):
-  global API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS, AUTH_MONITORS, VERBOSE_LOGGING
+  global API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS, AUTH_MONITORS, VERBOSE_LOGGING, SLEEPTIME
   API_MONITORS = '' 
   APIKEY_MONITORS = ''
   SECRET_MONITORS = ''
   AUTH_MONITORS = DEFAULT_AUTH
   VERBOSE_LOGGING = False
+  SLEEPTIME = 300
 
   for node in conf.children:
     if node.key == "Api":
