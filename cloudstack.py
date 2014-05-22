@@ -465,7 +465,7 @@ def get_stats():
         all_accounts = []
         if len(accounts) == querypagesize:
                 query_tmp = accounts
-                while len(query_tmp) > 0:
+                while len(query_tmp) > 1:
                         all_accounts.extend(query_tmp)
                         querypage = querypage + 1
                         query_tmp = cloudstack.listAccounts({
