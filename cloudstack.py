@@ -167,6 +167,7 @@ def get_stats():
   logger('verb', "get_stats calls API %s KEY %s SECRET %s" % (API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS))
   cloudstack = Client(API_MONITORS, APIKEY_MONITORS, SECRET_MONITORS)	
   try:
+        logger('verb', "Performing listhosts API call")
         query_tmp = None
         querypage = 1
         querypagesize = 500
@@ -193,6 +194,7 @@ def get_stats():
         else:
                 all_hypervisors.extend(hypervisors)
         hypervisors = all_hypervisors
+        logger('verb', "Completed listhosts API call")
   except:
      	logger('warn', "status err Unable to connect to CloudStack URL at %s for Hosts" % API_MONITORS)
   for  h in hypervisors:
@@ -214,6 +216,7 @@ def get_stats():
 
   # collect number of active console sessions
   try:
+        logger('verb', "Performing listSystemVms API call")
         query_tmp = None
         querypage = 1
         querypagesize = 500
@@ -236,6 +239,7 @@ def get_stats():
         else:
                 all_systemvms.extend(systemvms)
         systemvms = all_systemvms
+        logger('verb', "Completed listSystemVms API call")
 
   except:
      	logger('warn', "status err Unable to connect to CloudStack URL at %s for SystemVms" % API_MONITORS)
@@ -247,6 +251,7 @@ def get_stats():
 
   # collect number of zones, available public ips and VMs
   try:
+        logger('verb', "Performing listZones API call")
         query_tmp = None
         querypage = 1
         querypagesize = 500
@@ -269,6 +274,7 @@ def get_stats():
         else:
             all_zones.extend(zones)
         zones = all_zones
+        logger('verb', "Completed listZones API call")
 
   except:
       logger('warn', "status err Unable to connect to CloudStack URL at %s for ListZone" % API_MONITORS)
@@ -289,6 +295,7 @@ def get_stats():
 
         # collect number of virtual machines 
         try:
+            logger('verb', "Performing listVirtualMachines API call")
             query_tmp = None
             querypage = 1
             querypagesize = 500
@@ -313,6 +320,7 @@ def get_stats():
             else:
                 all_virtualmachines.extend(virtualmachines)
             virtualmachines = all_virtualmachines
+            logger('verb', "Completed listVirtualMachines API call")
                 
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVms" % API_MONITORS)
@@ -340,6 +348,7 @@ def get_stats():
 
         # collect number of root volumes 
         try:
+            logger('verb', "Performing listVolumes API call")
             query_tmp = None
             querypage = 1
             querypagesize = 500
@@ -364,6 +373,7 @@ def get_stats():
             else:
                 all_rootvolumes.extend(rootvolumes)
             rootvolumes = all_rootvolumes
+            logger('verb', "Completed listVolumes API call")
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVolumes" % API_MONITORS)
 
@@ -443,6 +453,7 @@ def get_stats():
 
   # collect accounts
   try:
+        logger('verb', "Performing listAccounts API call")
         query_tmp = None
         querypage = 1
         querypagesize = 500
@@ -465,6 +476,7 @@ def get_stats():
         else:
                 all_accounts.extend(accounts)
         accounts = all_accounts
+        logger('verb', "Completed listAccounts API call")
   except:
       print("status err Unable to connect to CloudStack URL at %s for ListAccounts")
 
