@@ -152,7 +152,7 @@ METRIC_TYPES = {
   'zonecapadiskalloctotal': ('z_capacity_allocated_disk_total', 'current'),
   'zonecapadiskallocused': ('z_capacity_allocated_disk_used', 'current'),
   'zonecapadiskallocpercentused': ('z_capacity_allocated_disk_percent-used', 'current'),
-  'asyncjobsscount': ('g_async_jobs_count', 'current')
+  'asyncjobscount': ('g_async_jobs_count', 'current')
 }
 
 METRIC_DELIM = '.'
