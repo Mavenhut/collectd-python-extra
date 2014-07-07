@@ -98,7 +98,7 @@ class Client(BaseClient):
                             return self.request('listVolumes', args)
 
         def listAsyncJobs(self, args={}):
-                            return self.request('listVolumes', args)
+                            return self.request('listAsyncJobs', args)
         
         
 NAME = 'cloudstack'
