@@ -550,7 +550,7 @@ def get_stats():
 
   # collect async jobs
   try:
-        logger('verb', "Performing listAccounts API call")
+        logger('verb', "Performing listAsyncJobs API call")
         query_tmp = None
         querypage = 1
         querypagesize = 500
@@ -578,8 +578,6 @@ def get_stats():
       print("status err Unable to connect to CloudStack URL at %s for listAsyncJobs")
 
   metricnameJobsCount = METRIC_DELIM.join([ 'asyncjobscount',  'asyncjobscount' ])
-
-
   stats[metricnameJobsCount] = len(jobs)
 
   time.sleep(SLEEPTIME)  
