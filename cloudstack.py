@@ -96,7 +96,8 @@ class Client(BaseClient):
 
         def listVolumes(self, args={}):
                             return self.request('listVolumes', args)
-
+        def listAsyncJobs(self, args={}):
+                            return self.request('listVolumes', args)
         
         
 NAME = 'cloudstack'
@@ -149,8 +150,8 @@ METRIC_TYPES = {
   'zonecapasspercentused': ('z_capacity_SSdisk_percent-used', 'current'),
   'zonecapadiskalloctotal': ('z_capacity_allocated_disk_total', 'current'),
   'zonecapadiskallocused': ('z_capacity_allocated_disk_used', 'current'),
-  'zonecapadiskallocpercentused': ('z_capacity_allocated_disk_percent-used', 'current')
- 
+  'zonecapadiskallocpercentused': ('z_capacity_allocated_disk_percent-used', 'current'),
+  'asyncjobsscount': ('g_async_jobs_count', 'current')
 }
 
 METRIC_DELIM = '.'
@@ -181,7 +182,7 @@ def get_stats():
         all_hypervisors = []
         if len(hypervisors) == querypagesize:
                 query_tmp = hypervisors
-                while len(query_tmp) > 0:
+                while len(query_tmp) > 1:
                         all_hypervisors.extend(query_tmp)
                         querypage = querypage + 1
                         query_tmp = cloudstack.listHosts({
@@ -228,7 +229,7 @@ def get_stats():
         all_systemvms = []
         if len(systemvms) == querypagesize:
                 query_tmp = systemvms
-                while len(query_tmp) > 0:
+                while len(query_tmp) > 1:
                         all_systemvms.extend(query_tmp)
                         querypage = querypage + 1
                         query_tmp = cloudstack.listSystemVms({
@@ -263,7 +264,7 @@ def get_stats():
         all_zones = []
         if len(zones) == querypagesize:
             query_tmp = zones
-            while len(query_tmp) > 0:
+            while len(query_tmp) > 1:
                 all_zones.extend(query_tmp)
                 querypage = querypage + 1
                 query_tmp = cloudstack.listZones({
@@ -308,7 +309,7 @@ def get_stats():
             all_virtualmachines = []
             if len(virtualmachines) == querypagesize:
                 query_tmp = virtualmachines
-                while len(query_tmp) > 0:
+                while len(query_tmp) > 1:
                         all_virtualmachines.extend(query_tmp)
                         querypage = querypage + 1
                         query_tmp = cloudstack.listVirtualMachines({
@@ -361,7 +362,7 @@ def get_stats():
             all_rootvolumes = []
             if len(rootvolumes) == querypagesize:
                 query_tmp = rootvolumes
-                while len(query_tmp) > 0:
+                while len(query_tmp) > 1:
                         all_rootvolumes.extend(query_tmp)
                         querypage = querypage + 1
                         query_tmp = cloudstack.listVolumes({
@@ -546,6 +547,40 @@ def get_stats():
                 stats[metricnameCapaZoneDiskAllocTotal] = c['capacitytotal']
                 stats[metricnameCapaZoneDiskAllocUsed] = c['capacityused']
                 stats[metricnameCapaZoneDiskAllocPercentUsed] = c['percentused']
+
+  # collect async jobs
+  try:
+        logger('verb', "Performing listAccounts API call")
+        query_tmp = None
+        querypage = 1
+        querypagesize = 500
+        jobs = cloudstack.listAsyncJobs({
+                'listall': 'true',
+                'page': str(querypage),
+                'pagesize': str(querypagesize)
+                })
+        all_jobs = []
+        if len(jobs) == querypagesize:
+                query_tmp = jobs
+                while len(query_tmp) > 1:
+                        all_jobs.extend(query_tmp)
+                        querypage = querypage + 1
+                        query_tmp = cloudstack.listAsyncJobs({
+                                        'listall': 'true',
+                                        'page': str(querypage),
+                                        'pagesize': str(querypagesize)
+                                        })
+        else:
+                all_jobs.extend(jobs)
+        jobs = all_jobs
+        logger('verb', "Completed listAsyncJobs API call")
+  except:
+      print("status err Unable to connect to CloudStack URL at %s for listAsyncJobs")
+
+  metricnameJobsCount = METRIC_DELIM.join([ 'asyncjobscount',  'asyncjobscount' ])
+
+
+  stats[metricnameJobsCount] = len(jobs)
 
   time.sleep(SLEEPTIME)  
   return stats	
