@@ -10,7 +10,7 @@ import MySQLdb
 import sys
 import time
 
-SLEEPTIME = 61
+SLEEPTIME = 58
 
 def get_asyncjobs(dbhost,user,pwd,database):
   if not (dbhost and user and pwd and database):
