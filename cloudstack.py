@@ -550,36 +550,37 @@ def get_stats():
                 stats[metricnameCapaZoneDiskAllocPercentUsed] = c['percentused']
 
   # collect async jobs
-  try:
-        logger('verb', "Performing listAsyncJobs API call")
-        query_tmp = None
-        querypage = 1
-        querypagesize = 500
-        jobs = cloudstack.listAsyncJobs({
-                'listall': 'true',
-                'page': str(querypage),
-                'pagesize': str(querypagesize)
-                })
-        all_jobs = []
-        if len(jobs) == querypagesize:
-                query_tmp = jobs
-                while len(query_tmp) > 1:
-                        all_jobs.extend(query_tmp)
-                        querypage = querypage + 1
-                        query_tmp = cloudstack.listAsyncJobs({
-                                        'listall': 'true',
-                                        'page': str(querypage),
-                                        'pagesize': str(querypagesize)
-                                        })
-        else:
-                all_jobs.extend(jobs)
-        jobs = all_jobs
-        logger('verb', "Completed listAsyncJobs API call")
-  except:
-      print("status err Unable to connect to CloudStack URL at %s for listAsyncJobs")
-
-  metricnameJobsCount = METRIC_DELIM.join([ 'asyncjobscount',  'asyncjobscount' ])
-  stats[metricnameJobsCount] = len(jobs)
+  # disabled as doing it from database in a separate script
+  #try:
+  #      logger('verb', "Performing listAsyncJobs API call")
+  #      query_tmp = None
+  #      querypage = 1
+  #      querypagesize = 500
+  #      jobs = cloudstack.listAsyncJobs({
+  #              'listall': 'true',
+  #              'page': str(querypage),
+  #              'pagesize': str(querypagesize)
+  #              })
+  #      all_jobs = []
+  #      if len(jobs) == querypagesize:
+  #              query_tmp = jobs
+  #              while len(query_tmp) > 1:
+  #                      all_jobs.extend(query_tmp)
+  #                      querypage = querypage + 1
+  #                      query_tmp = cloudstack.listAsyncJobs({
+  #                                      'listall': 'true',
+  #                                      'page': str(querypage),
+  #                                      'pagesize': str(querypagesize)
+  #                                      })
+  #      else:
+  #              all_jobs.extend(jobs)
+  #      jobs = all_jobs
+  #      logger('verb', "Completed listAsyncJobs API call")
+  #except:
+  #    print("status err Unable to connect to CloudStack URL at %s for listAsyncJobs")
+  #
+  #  metricnameJobsCount = METRIC_DELIM.join([ 'asyncjobscount',  'asyncjobscount' ])
+  #stats[metricnameJobsCount] = len(jobs)
 
   time.sleep(SLEEPTIME)  
   return stats	
