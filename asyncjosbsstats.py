@@ -85,21 +85,21 @@ try:
     val = collectd.Values(plugin=NAME, type="gauge")
     val.values = [cs_stats['nbasyncjobsrunning'] ]
     logger('verb', "Nb of running async jobs: %s" % cs_stats['nbasyncjobsrunning'])
-    val.type_instance = "running-async-jobs"
+    val.type_instance = "async-jobs-running"
     val.type = "gauge"
     val.dispatch()
     #failed jobs
     val = collectd.Values(plugin=NAME, type="gauge")
     val.values = [cs_stats['nbasyncjobsfailed'] ]
     logger('verb', "Nb of failed async jobs: %s" % cs_stats['nbasyncjobsfailed'])
-    val.type_instance = "failed-async-jobs"
+    val.type_instance = "async-jobs-failed"
     val.type = "gauge"
     val.dispatch()
     #all jobs
     val = collectd.Values(plugin=NAME, type="gauge")
     val.values = [cs_stats['nbasyncjobsall'] ]
     logger('verb', "Nb of all async jobs: %s" % cs_stats['nbasyncjobsall'])
-    val.type_instance = "all-async-jobs"
+    val.type_instance = "async-jobs-all"
     val.type = "gauge"
     val.dispatch()
 
