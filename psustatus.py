@@ -31,7 +31,7 @@ def get_psustatus():
             psuItem = matchedline[0].lower()
             psuItem = psuItem.replace(" ", "_")
             while psuItem.endswith('_'):
-                psuItem = psuitem[:-1]
+                psuItem = psuItem[:-1]
             psuState = matchedline[1].split("x")[1]
  
             psuStatus['psuItem'] = psuItem
