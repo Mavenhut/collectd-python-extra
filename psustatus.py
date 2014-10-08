@@ -10,9 +10,9 @@ import time
 from subprocess import PIPE, Popen
 global SLEEPTIME
 
-SLEEPTIME = 300
+SLEEPTIME = 120
 VERBOSE_LOGGING = False
-NAME = "ipmi"
+NAME = "ipmi.psu"
 
 def get_psustatus():
     psuStatus = {}
@@ -34,8 +34,9 @@ def get_psustatus():
                 psuItem = psuItem[:-1]
             psuState = matchedline[1].split("x")[1]
  
-            psuStatus['psuItem'] = psuItem
-            psuStatus['psuState'] = int(psuState)
+            psuStatus[str(psuItem)] = int(psuState)
+            #psuStatus['psuItem'] = psuItem
+            #psuStatus['psuState'] = int(psuState)
 
     time.sleep(SLEEPTIME)        
     return psuStatus
