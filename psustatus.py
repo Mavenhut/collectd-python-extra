@@ -35,7 +35,7 @@ def get_psustatus():
             psuState = matchedline[1].split("x")[1]
  
             psuStatus['psuItem'] = psuItem
-            psuStatus['psuState'] = psuState
+            psuStatus['psuState'] = int(psuState)
 
     time.sleep(SLEEPTIME)        
     return psuStatus
