@@ -30,14 +30,14 @@ def get_psustatus():
         if "Status" in lines:
             i = i + 1
             matchedline = lines.split("|")
-            psuitem = "ps%s_status" % i
+            psuItem = "ps%s_status" % i
             psustatus = matchedline[5]
             if "Presence detected" in psustatus:
-                psustatus = 0
+                psuState = 0
             else:
-                psustatus = 1
+                psuState = 1
             
-            psuStatus[str(psuItem)] = int(psuState)
+            psuStatus[str(psuItem)] = psuState
 
     time.sleep(SLEEPTIME)        
     return psuStatus
