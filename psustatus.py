@@ -38,6 +38,8 @@ def get_psustatus():
                 psustatus = 0
             else:
                 psustatus = 1
+            
+            psuStatus[str(psuItem)] = int(psuState)
 
     time.sleep(SLEEPTIME)        
     return psuStatus
