@@ -25,14 +25,12 @@ def get_psustatus():
         logger('err', "Failed to query ipmi-sensors. Please ensure it is installed")
         raise
 
+    i = 0
     for lines in p.stdout:
         if "Status" in lines:
+            i = i + 1
             matchedline = lines.split("|")
-            psuitem = matchedline[1].lower()
-            psuitem = psuitem.replace(" ", "_")
-            psuitem = psuitem[1:]
-            while psuitem.endswith('_'):
-                psuitem = psuitem[:-1]
+            psuitem = "ps%s_status" % i
             psustatus = matchedline[5]
             if "Presence detected" in psustatus:
                 psustatus = 0
