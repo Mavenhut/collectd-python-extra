@@ -34,6 +34,8 @@ def get_psustatus():
             psustatus = matchedline[5]
             if "Presence detected" in psustatus:
                 psuState = 0
+            elif "Unknown" in psustatus::
+                psuState = 0
             else:
                 psuState = 1
             
