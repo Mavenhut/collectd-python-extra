@@ -384,7 +384,7 @@ def get_stats():
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVolumes" % API_MONITORS)
 
-        
+        rootvolsize = 0 
         for rootvolume in rootvolumes:
             rootvolsize += rootvolume['size']
 
