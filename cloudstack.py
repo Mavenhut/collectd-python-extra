@@ -126,6 +126,7 @@ METRIC_TYPES = {
     'zonepubliciptotal': ('z_public_ip_total', 'current'),
     'zonepublicippercent': ('z_public_ip_percent', 'percent'),
     'zonevmtotal': ('z_vm_total', 'current'),
+    'zonerootdiskavgsize': ('z_disksize_avg', 'current'),
     'zonevmtotalrunning': ('z_vm_total_running', 'current'),
     'zonevmtotalstopped': ('z_vm_total_stopped', 'current'),
     'zonevmtotalstarting': ('z_vm_total_starting', 'current'),
@@ -385,6 +386,8 @@ def get_stats():
 
         
         for rootvolume in rootvolumes:
+            rootvolsize += rootvolume['size']
+
             if rootvolume['vmstate'] == 'Running':
                 #add to a dict to get the Running VMs per hypervisor
                 host = (rootvolume['storage'])
@@ -413,6 +416,12 @@ def get_stats():
                     hvmstarting[host] += 1
                 else:
                     hvmstarting[host] = 1
+
+        rootvolsize = (rootvolsize / 1073741824)
+        rootavgsize = rootvolsize / len(rootvolumes)
+        metricnameRootAvgSizeZone= METRIC_DELIM.join([ 'zonerootdiskavgsize', zone['name'].lower(),  'zonerootdiskavgsize' ])
+        stats[metricnameRootAvgSizeZone] = rootavgsize
+     
         #add metric VMs per hypervisor
         for h in hypervisors:
             virtualMachineHTotalCount = 0
