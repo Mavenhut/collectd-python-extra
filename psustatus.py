@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #Author: Loic Lambiel, exoscale
-#This is a collectd python script to get the PSU status using ipmitool
+#This is a collectd python script to get the PSU status using ipmi-sensors (freeipmi-tools package)
 
 
 
@@ -16,27 +16,28 @@ NAME = "ipmi.psu"
 
 def get_psustatus():
     psuStatus = {}
-    logger('verb', "Performing ipmitool query to get psu status")
+    logger('verb', "Performing ipmi-sensors query to get psu status")
     
     try:
-        p = Popen(["ipmitool", "sensor"], stdin=PIPE, stdout=PIPE, bufsize=1)
+        p = Popen(["ipmi-sensors", "-t", "Power_Supply", "--no-header-output"], stdin=PIPE, stdout=PIPE, bufsize=1)
         logger('verb', "ipmitool query done")
     except:
-        logger('err', "Failed to query ipmitool. Please ensure it is installed")
+        logger('err', "Failed to query ipmi-sensors. Please ensure it is installed")
         raise
 
     for lines in p.stdout:
-        if "PS" in lines:
+        if "Status" in lines:
             matchedline = lines.split("|")
-            psuItem = matchedline[0].lower()
-            psuItem = psuItem.replace(" ", "_")
-            while psuItem.endswith('_'):
-                psuItem = psuItem[:-1]
-            psuState = matchedline[1].split("x")[1]
- 
-            psuStatus[str(psuItem)] = int(psuState)
-            #psuStatus['psuItem'] = psuItem
-            #psuStatus['psuState'] = int(psuState)
+            psuitem = matchedline[1].lower()
+            psuitem = psuitem.replace(" ", "_")
+            psuitem = psuitem[1:]
+            while psuitem.endswith('_'):
+                psuitem = psuitem[:-1]
+            psustatus = matchedline[5]
+            if "Presence detected" in psustatus:
+                psustatus = 0
+            else:
+                psustatus = 1
 
     time.sleep(SLEEPTIME)        
     return psuStatus
