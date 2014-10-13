@@ -4,6 +4,7 @@
 # Description : This is a collectd python module to gather stats from cloudstack
 # inspired by collectd-haproxy from Michael Leinartas - https://github.com/mleinart/collectd-haproxy
 
+from __future__ import division
 import collectd
 import urllib2
 import urllib
@@ -13,7 +14,6 @@ import base64
 import hashlib
 import re
 import time
-from __future__ import division
 
 class BaseClient(object):
     def __init__(self, api, apikey, secret):
