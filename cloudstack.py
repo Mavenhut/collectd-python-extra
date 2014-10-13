@@ -299,7 +299,8 @@ def get_stats():
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
         metricnameZonesCount = METRIC_DELIM.join([ 'zonescount',  'zonescount' ])
         metricnameHostZoneTotal = METRIC_DELIM.join([ 'zonehosttotal', zone['name'].lower(),  'zonehosttotal' ])
-
+        metricnameVMZoneRAMavgSize= METRIC_DELIM.join([ 'zonevmramavgsize', zone['name'].lower(),  'zonevmramavgsize' ])
+        metricnameVMZoneCPUavgSize= METRIC_DELIM.join([ 'zonevmcpuavgsize', zone['name'].lower(),  'zonevmcpuavgsize' ])
 
         # collect number of virtual machines 
         try:
@@ -330,27 +331,23 @@ def get_stats():
             virtualmachines = all_virtualmachines
             logger('verb', "Completed listVirtualMachines API call")
             
-            for vm in virtualmachines:
-                cpu += vm['cpunumber']
-                ram += vm['memory']
 
-            ram = (ram / 1024)
-
-            metricnameVMZoneRAMavgSize= METRIC_DELIM.join([ 'zonevmramavgsize', zone['name'].lower(),  'zonevmramavgsize' ])
-            metricnameVMZoneCPUavgSize= METRIC_DELIM.join([ 'zonevmcpuavgsize', zone['name'].lower(),  'zonevmcpuavgsize' ])
-            stats[metricnameVMZoneRAMavgSize] = ram
-            stats[metricnameVMZoneCPUavgSize] = cpu
-           
     
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVms" % API_MONITORS)
 
+        
+        
+        
+        
         virtualMachineZoneRunningCount = 0
         virtualMachineZoneStoppedCount = 0
         virtualMachineZoneStartingCount = 0
         virtualMachineZoneStoppingCount = 0
 
         for virtualmachine in virtualmachines:
+            cpu += virtualmachine['cpunumber']
+            ram += virtualmachine['memory']
             if virtualmachine['state'] == 'Running':
                 virtualMachineZoneRunningCount = virtualMachineZoneRunningCount + 1
             elif virtualmachine['state'] == 'Stopped':
@@ -359,7 +356,10 @@ def get_stats():
                 virtualMachineZoneStartingCount = virtualMachineZoneStartingCount + 1
             elif virtualmachine['state'] == 'Starting':
                 virtualMachineZoneStoppingCount = virtualMachineZoneStoppingCount + 1
-
+        
+        ram = (ram / 1024)
+        stats[metricnameVMZoneRAMavgSize] = ram
+        stats[metricnameVMZoneCPUavgSize] = cpu
         stats[metricnameVmZoneTotal] = len(virtualmachines)
         stats[metricnameVmZoneTotalRunning] = virtualMachineZoneRunningCount
         stats[metricnameVmZoneTotalStopped] = virtualMachineZoneStoppedCount
