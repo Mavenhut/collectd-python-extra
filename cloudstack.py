@@ -360,8 +360,10 @@ def get_stats():
                 virtualMachineZoneStoppingCount = virtualMachineZoneStoppingCount + 1
         
         ram = (ram / 1024)
-        stats[metricnameVMZoneRAMavgSize] = ram
-        stats[metricnameVMZoneCPUavgSize] = cpu
+        ramavg = (ram/len(virtualmachines))
+        cpuavg = (cpu/len(vms))
+        stats[metricnameVMZoneRAMavgSize] = ramavg
+        stats[metricnameVMZoneCPUavgSize] = cpuavg
         stats[metricnameVmZoneTotal] = len(virtualmachines)
         stats[metricnameVmZoneTotalRunning] = virtualMachineZoneRunningCount
         stats[metricnameVmZoneTotalStopped] = virtualMachineZoneStoppedCount
