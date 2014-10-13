@@ -13,6 +13,7 @@ import base64
 import hashlib
 import re
 import time
+from __future__ import division
 
 class BaseClient(object):
     def __init__(self, api, apikey, secret):
