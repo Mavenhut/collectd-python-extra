@@ -344,6 +344,8 @@ def get_stats():
         virtualMachineZoneStoppedCount = 0
         virtualMachineZoneStartingCount = 0
         virtualMachineZoneStoppingCount = 0
+        cpu = 0
+        ram = 0
 
         for virtualmachine in virtualmachines:
             cpu += virtualmachine['cpunumber']
