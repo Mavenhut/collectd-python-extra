@@ -127,6 +127,8 @@ METRIC_TYPES = {
     'zonepublicippercent': ('z_public_ip_percent', 'percent'),
     'zonevmtotal': ('z_vm_total', 'current'),
     'zonerootdiskavgsize': ('z_disksize_avg', 'current'),
+    'zonevmramavgsize': ('z_vm_ram_avg', 'current'),
+    'zonevmcpuavgsize': ('z_vm_cpu_avg', 'current'),
     'zonevmtotalrunning': ('z_vm_total_running', 'current'),
     'zonevmtotalstopped': ('z_vm_total_stopped', 'current'),
     'zonevmtotalstarting': ('z_vm_total_starting', 'current'),
@@ -327,7 +329,19 @@ def get_stats():
                 all_virtualmachines.extend(virtualmachines)
             virtualmachines = all_virtualmachines
             logger('verb', "Completed listVirtualMachines API call")
-                
+            
+            for vm in virtualmachines:
+                cpu += vm['cpunumber']
+                ram += vm['memory']
+
+            ram = (ram / 1024)
+
+            metricnameVMZoneRAMavgSize= METRIC_DELIM.join([ 'zonevmramavgsize', zone['name'].lower(),  'zonevmramavgsize' ])
+            metricnameVMZoneCPUavgSize= METRIC_DELIM.join([ 'zonevmcpuavgsize', zone['name'].lower(),  'zonevmcpuavgsize' ])
+            stats[metricnameVMZoneRAMavgSize] = ram
+            stats[metricnameVMZoneCPUavgSize] = cpu
+           
+    
         except:
             logger('warn', "status err Unable to connect to CloudStack URL at %s for ListVms" % API_MONITORS)
 
