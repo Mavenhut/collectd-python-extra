@@ -361,7 +361,7 @@ def get_stats():
         
         ram = (ram / 1024)
         ramavg = (ram/len(virtualmachines))
-        cpuavg = (cpu/len(vms))
+        cpuavg = (cpu/len(virtualmachines))
         stats[metricnameVMZoneRAMavgSize] = ramavg
         stats[metricnameVMZoneCPUavgSize] = cpuavg
         stats[metricnameVmZoneTotal] = len(virtualmachines)
