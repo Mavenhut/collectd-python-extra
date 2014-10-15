@@ -36,6 +36,10 @@ def get_psustatus():
                 psuState = 0
             elif "Unknown" in psustatus:
                 psuState = 0
+            elif "OK" in psustatus:
+                psuState = 0
+            elif "Ok" in psustatus:
+                psuState = 0
             else:
                 psuState = 1
             
