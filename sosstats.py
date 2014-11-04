@@ -4,7 +4,7 @@
 #
 # Author : Loic Lambiel @ exoscale
 # Description : This is a collectd python module to gather some metrics from pithos - cassandra (exoscale SOS)
-
+# install dep module using  pip install cassandra-driver blist
 
 from __future__ import division
 from cassandra.cluster import Cluster
