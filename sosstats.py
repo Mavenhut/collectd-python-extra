@@ -55,7 +55,9 @@ def get_stats(nodes):
         sys.exit(1)
 
     finally:
-        logger('verb', "Entering sleeptime1")
+        session.cluster.shutdown()
+        session.shutdown()
+        logger('verb', "Entering sleeptime")
         time.sleep(SLEEPTIME)
 
 
