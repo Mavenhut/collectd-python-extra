@@ -55,13 +55,14 @@ def get_stats(nodes):
         sys.exit(1)
 
     finally:
+        logger('verb', "Entering sleeptime1")
         time.sleep(SLEEPTIME)
 
 
 
 
 NAME = "pithos-sos"
-VERBOSE_LOGGING = True
+VERBOSE_LOGGING = False
 
 nodes = ""
 
