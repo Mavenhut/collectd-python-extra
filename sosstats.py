@@ -8,6 +8,9 @@
 
 from __future__ import division
 from cassandra.cluster import Cluster
+import sys
+import collectd
+import time
 
 SLEEPTIME = 300
 
@@ -16,7 +19,7 @@ def get_stats(nodes):
         logger('error', "empty parameter, nodes: %s" % (nodes))
         sys.exit(1)
     try:
-        logger('debug', "Connecting to cluster")
+        logger('verb', "Connecting to cluster")
         cluster = Cluster([nodes])
 
         session = cluster.connect('storage')
@@ -38,8 +41,8 @@ def get_stats(nodes):
         for i in query:
             totalobjectsize = totalobjectsize + i.size
             nbobjects = nbobjects + 1
-            totalobjectsize = totalobjectsize / 1073741824
-
+        
+        totalobjectsize = totalobjectsize / 1073741824
         stats = {}
         stats['totalobjectsize'] = totalobjectsize
         stats['nbobjects'] = nbobjects
@@ -51,21 +54,23 @@ def get_stats(nodes):
         logger('error', "Error during cassandra query: %s" % e)
         sys.exit(1)
 
+    finally:
+        time.sleep(SLEEPTIME)
 
 
-import collectd
+
 
 NAME = "pithos-sos"
-VERBOSE_LOGGING = False
+VERBOSE_LOGGING = True
 
 nodes = ""
 
 def config_callback(conf):
     global  nodes, VERBOSE_LOGGING
-    for nodes in conf.children:
+    for node in conf.children:
         logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
-        if node.key == "node":
-            node = node.values[0]
+        if node.key == "nodes":
+            nodes = node.values[0]
         elif node.key == "Verbose":
             VERBOSE_LOGGING = bool(node.values[0])
         else:
