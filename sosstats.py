@@ -22,7 +22,7 @@ def get_stats(nodes):
         logger('verb', "Connecting to cluster")
         cluster = Cluster([nodes])
 
-        session = cluster.connect('storage')
+        session = cluster.connect()
 
         totalobjectsize = 0
         nbobjects = 0
