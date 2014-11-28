@@ -34,18 +34,18 @@ def get_stats(nodes):
         for i in query:
             nbbuckets = i.count
 
-        logger('verb', "Querying objects + count")
+        #logger('verb', "Querying objects + count")
 
-        query = session.execute('SELECT size FROM metastore.object')
+        #query = session.execute('SELECT size FROM metastore.object')
 
-        for i in query:
-            totalobjectsize = totalobjectsize + i.size
-            nbobjects = nbobjects + 1
+        #for i in query:
+        #    totalobjectsize = totalobjectsize + i.size
+        #    nbobjects = nbobjects + 1
         
-        totalobjectsize = totalobjectsize / 1073741824
+        #totalobjectsize = totalobjectsize / 1073741824
         stats = {}
-        stats['totalobjectsize'] = totalobjectsize
-        stats['nbobjects'] = nbobjects
+        #stats['totalobjectsize'] = totalobjectsize
+        #stats['nbobjects'] = nbobjects
         stats['nbbuckets'] = nbbuckets
         return stats
 
