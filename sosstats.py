@@ -27,12 +27,20 @@ def get_stats(nodes):
         totalobjectsize = 0
         nbobjects = 0
         nbbuckets = 0
+        nbtenants = 0
+
         logger('verb', "Querying nb of buckets")
 
-        query = session.execute('SELECT COUNT (*)  FROM bucketstore.bucket')
+        query = session.execute('SELECT tenant FROM bucketstore.bucket')
 
         for i in query:
             nbbuckets = i.count
+            tenants.append(i.tenant)
+
+        tenants = (set(tenants))
+
+        for i in tenants:
+            nbtenants = nbtenants + 1
 
         logger('verb', "Querying objects + count")
 
@@ -47,6 +55,7 @@ def get_stats(nodes):
         stats['totalobjectsize'] = totalobjectsize
         stats['nbobjects'] = nbobjects
         stats['nbbuckets'] = nbbuckets
+        stats['nbtenants'] = nbtenants
         return stats
 
 
@@ -102,6 +111,12 @@ def read_callback():
     val.type = "gauge"
     val.dispatch()
 
+    val = collectd.Values(plugin=NAME, type="gauge")
+    val.values = [sos_stats['nbtenants'] ]
+    logger('verb', "Total nb Tenants %s" % sos_stats['nbtenants'])
+    val.type_instance = "total-tenants-nb"
+    val.type = "gauge"
+    val.dispatch()
 
 
 # logging function
