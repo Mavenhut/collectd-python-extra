@@ -35,7 +35,7 @@ def get_stats(nodes):
         query = session.execute('SELECT tenant FROM bucketstore.bucket')
 
         for i in query:
-            nbbuckets = i.count
+            nbbuckets = nbbuckets + 1
             tenants.append(i.tenant)
 
         tenants = (set(tenants))
