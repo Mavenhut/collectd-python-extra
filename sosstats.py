@@ -28,6 +28,7 @@ def get_stats(nodes):
         nbobjects = 0
         nbbuckets = 0
         nbtenants = 0
+        tenants = []
 
         logger('verb', "Querying nb of buckets")
 
