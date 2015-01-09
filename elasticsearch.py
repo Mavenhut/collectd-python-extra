@@ -1,217 +1,226 @@
 #!/usr/bin/env python
-import sys
 import os
-import json
 import requests
-import pprint
+
+
+def merge(one, two):
+    cp = one.copy()
+    cp.udpate(two)
+    return cp
+
 
 def color_to_level(color):
-  if color == 'green':
-    return 0
-  elif color == 'yellow':
-    return 1
-  elif color == 'red':
-    return 2
-  else:
-    return 3
+    return {
+        'green': 0,
+        'yellow': 1,
+        'red': 2
+    }.get(color, 3)
 
-HEALTH_METRICS = {
-  'active_primary_shards': {'type': 'gauge'},
-  'active_shards': {'type': 'gauge'},
-  'initializing_shards': {'type': 'gauge'},
-  'number_of_data_nodes': {'type': 'gauge'},
-  'number_of_nodes': {'type': 'gauge'},
-  'relocating_shards': {'type': 'gauge'},
-  'unassigned_shards': {'type': 'gauge'},
-  'timed_out': {'type': 'gauge' },
-  'status': { 'type': 'gauge', 'transform': color_to_level }
+gauge = {'type': 'gauge'}
+
+health_metrics = {
+    'active_primary_shards': gauge,
+    'active_shards': gauge,
+    'initializing_shards': gauge,
+    'number_of_data_nodes': gauge,
+    'number_of_nodes': gauge,
+    'relocating_shards': gauge,
+    'unassigned_shards': gauge,
+    'timed_out': merge(gauge, {'transform': int}),
+    'status': merge(gauge, {'transform': color_to_level}),
 }
 
-def deep_lookup(struct, path):
+stats_gauges = [
+    'breakers.fielddata.estimated_size_in_bytes',
+    'breakers.fielddata.limit_size_in_bytes',
+    'breakers.fielddata.tripped',
+    'breakers.fielddata.overhead',
+    'breakers.parent.estimated_size_in_bytes',
+    'breakers.parent.limit_size_in_bytes',
+    'breakers.parent.tripped',
+    'breakers.parent.overhead',
+    'breakers.request.estimated_size_in_bytes',
+    'breakers.request.limit_size_in_bytes',
+    'breakers.request.tripped',
+    'breakers.request.overhead',
 
-  first_key = path[0]
-  new_path = path[1:]
+    'http.current_open',
 
-  if first_key == '__FIRST__':
-    first_key = struct.keys()[0]
+    'indices.query_cache.evictions',
+    'indices.query_cache.miss_count',
+    'indices.query_cache.memory_size_in_bytes',
+    'indices.query_cache.hit_count',
+    'indices.docs.count',
+    'indices.docs.deleted',
+    'indices.search.open_contexts',
+    'indices.search.fetch_current',
+    'indices.search.query_current',
+    'indices.translog.operations',
+    'indices.translog.size_in_bytes',
+    'indices.flush.total',
+    'indices.segments.version_map_memory_in_bytes',
+    'indices.segments.index_writer_memory_in_bytes',
+    'indices.segments.fixed_bit_set_memory_in_bytes',
+    'indices.segments.memory_in_bytes',
+    'indices.segments.count',
+    'indices.segments.index_writer_max_memory_in_bytes',
+    'indices.suggest.current',
+    'indices.id_cache.memory_size_in_bytes',
+    'indices.fielddata.evictions',
+    'indices.fielddata.memory_size_in_bytes',
+    'indices.store.size_in_bytes',
+    'indices.warmer.current',
+    'indices.filter_cache.evictions',
+    'indices.filter_cache.memory_size_in_bytes',
+    'indices.get.current',
+    'indices.completion.size_in_bytes',
+    'indices.indexing.delete_current',
+    'indices.indexing.is_throttled',
+    'indices.indexing.index_current',
+    'indices.merges.current_docs',
+    'indices.merges.total_docs',
+    'indices.merges.total_size_in_bytes',
+    'indices.merges.current',
+    'indices.merges.current_size_in_bytes',
+    'indices.percolate.queries',
+    'indices.percolate.memory_size_in_bytes',
+    'indices.percolate.current',
 
-  try:
-    new_struct = struct[first_key]
-  except KeyError:
-    return None
+    'process.mem.resident_in_bytes',
+    'process.mem.share_in_bytes',
+    'process.mem.total_virtual_in_bytes',
+    'process.open_file_descriptors',
+    'process.cpu.total_in_millis',
+    'process.cpu.user_in_millis',
+    'process.cpu.sys_in_millis',
+    'process.cpu.percent',
 
-  if len(new_path) == 0:
-    return new_struct
-  else:
-    return deep_lookup(new_struct, new_path)
-
-def name_from_path(path):
-  new_path = []
-  
-  for elem in path:
-    if elem != '__FIRST__':
-      new_path.append(elem)
-
-  return "_".join(new_path)
-
-STATS_METRICS = [
-  {'path': [ 'nodes', '__FIRST__', 'http', 'current_open' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'http', 'total_opened' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'bloom_size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'field_evictions' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'field_size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'filter_count' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'filter_evictions' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'filter_size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'cache', 'id_cache_size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'docs', 'count' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'docs', 'deleted' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'flush', 'total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'flush', 'total_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'current' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'exists_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'exists_total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'missing_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'missing_total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'get', 'total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'indexing', 'delete_current' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'indexing', 'delete_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'indexing', 'delete_total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'indexing', 'index_current' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'indexing', 'index_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'indexing', 'index_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'current' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'current_docs' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'current_size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'total_docs' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'total_size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'merges', 'total_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'refresh', 'total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'refresh', 'total_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'search', 'fetch_current' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'search', 'fetch_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'search', 'fetch_total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'search', 'query_current' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'search', 'query_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'search', 'query_total' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'store', 'size_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'indices', 'store', 'throttle_time_in_millis' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'process', 'mem', 'resident_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'process', 'mem', 'share_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'process', 'mem', 'total_virtual_in_bytes' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'process', 'open_file_descriptors' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'transport', 'rx_count' ], 'type': 'counter'},
-  {'path': [ 'nodes', '__FIRST__', 'transport', 'rx_size_in_bytes' ], 'type': 'counter'},
-  {'path': [ 'nodes', '__FIRST__', 'transport', 'server_open' ], 'type': 'gauge'},
-  {'path': [ 'nodes', '__FIRST__', 'transport', 'tx_count' ], 'type': 'counter'},
-  {'path': [ 'nodes', '__FIRST__', 'transport', 'tx_size_in_bytes' ], 'type': 'counter'},
+    'transport.server_open',
 ]
 
-class Metric:
-  def __init__(self, name, type="gauge", metric=0.0):
-    self.type = type
-    self.metric = metric
-    self.name = name
+stats_counters = [
+    'http.total_opened',
+    'transport.rx_count',
+    'transport.rx_size_in_bytes',
+    'transport.tx_count',
+    'transport.tx_size_in_bytes',
+    'indices.flush.total_time_in_millis',
+    'indices.refresh.total_time_in_millis',
+    'indices.warmer.total_time_in_millis',
+    'indices.merges.total_time_in_millis',
+    'indices.search.query_time_in_millis',
+    'indices.search.fetch_time_in_millis',
+    'indices.suggest.time_in_millis',
+    'indices.store.throttle_time_in_millis',
+    'indices.get.exists_time_in_millis',
+    'indices.get.time_in_millis',
+    'indices.get.missing_time_in_millis',
+    'indices.indexing.delete_time_in_millis',
+    'indices.indexing.throttle_time_in_millis',
+    'indices.indexing.index_time_in_millis',
+    'indices.percolate.time_in_millis',
+    'indices.get.total',
+    'indices.refresh.total',
+    'indices.suggest.total',
+    'indices.warmer.total',
+    'indices.merges.total',
+    'indices.percolate.total',
+    'indices.search.query_total',
+    'indices.search.fetch_total',
+    'indices.get.exists_total',
+    'indices.get.missing_total',
+    'indices.indexing.delete_total',
+    'indices.indexing.index_total',
+    'indices.indexing.noop_update_total',
+]
 
-  def __repr__(self):
-    return "Metric(%s:%s => %f)" % (self.name, self.type, self.metric)
+
+def lookup(data, selector):
+    keys = selector.split('.')
+    value = data
+    while keys:
+        value = value[keys.pop(0)]
+    return value
+
+
+class Metric:
+    __slots__ = ('type', 'metric', 'name')
+
+    def __init__(self, name, type="gauge", metric=0.0):
+        self.type = type
+        self.metric = metric
+        self.name = name
+
+    def __repr__(self):
+        return "Metric(%s:%s => %f)" % (self.name, self.type, self.metric)
+
 
 def check_es_cluster(instance="localhost", cluster='http://localhost:9200'):
+    stats_url = ('{0}/_nodes/_local/stats/'
+                 'http,indices,process,transport,breaker').format(cluster)
+    health_url = '{0}/_cluster/health'.format(cluster)
 
-  url_stats = "%s/_cluster/nodes/_local/stats?http=true&jvm=true&process=true&transport=true" % cluster
-  url_health = "%s/_cluster/health" % cluster
+    stats = requests.get(stats_url).json()
+    health = requests.get(health_url).json()
 
-  
-  stats = requests.get(url_stats)
-  health = requests.get(url_health)
-  statsjson = json.loads(stats.content)
-  healthjson = json.loads(health.content)
+    metrics = []
 
+    for name, metric in health_metrics.items():
+        datapoint = health[name]
 
-  metric_tab = []
+        if 'transform' in metric:
+            datapoint = metric['transform'](datapoint)
 
-  for name, metric_hints in HEALTH_METRICS.items():
+        metrics.append(Metric(name, type=metric['type'], metric=datapoint))
 
-    datapoint = healthjson[name]
+    for metric in stats_gauges:
+        datapoint = lookup(stats, metric)
+        metrics.append(Metric(metric, metric=datapoint))
 
-    if 'transform' in metric_hints:
-      transform_function = metric_hints['transform']
-      datapoint = transform_function(datapoint)
+    for metric in stats_counters:
+        datapoint = lookup(stats, metric)
+        metrics.append(Metric(metric, type='counter', metric=datapoint))
 
-    metric = Metric(name, type=metric_hints['type'], metric=datapoint)
-    metric_tab.append(metric)
+    return metrics
 
-
-  for metric_hints in STATS_METRICS:
-    name = name_from_path(metric_hints['path'])
-    datapoint = deep_lookup(statsjson, metric_hints['path'])
-
-    if 'transform' in metric_hints:
-      transform_function = metric_hints['transform']
-      datapoint = transform_function(datapoint)
-
-    metric = Metric(name, type=metric_hints['type'], metric=datapoint)
-    metric_tab.append(metric)
-
-#  pp = pprint.PrettyPrinter()
-#  pp.pprint(stats)
-#  pp.pprint(health)
-#  pp.pprint(metric_tab)
-
-  return metric_tab
-  
 
 try:
-  import collectd
+    import collectd
 
-  NAME = "elasticsearch"
+    class ESConfig:
+        cluster = "http://localhost:9200"
+        instance = "localhost"
 
-  class ESConfig:
-    cluster = "http://localhost:9200"
-    instance = "localhost"
+    def config_callback(conf):
+        for node in conf.children:
+            if node.key == 'Instance':
+                ESConfig.instance = node.values[0]
+            elif node.key == 'Cluster':
+                ESConfig.cluster = node.values[0]
+            else:
+                logger('verb', "unknown config key in elasticsearch module: %s" % node.key)
 
-  def config_callback(conf):
-    for node in conf.children:
-      if node.key == 'Instance':
-        ESConfig.instance = node.values[0]
-      elif node.key == 'Cluster':
-        ESConfig.cluster = node.values[0]
-      else:
-        logger('verb', "unknown config key in elasticsearch module: %s" % node.key)
+    def read_callback():
+        metrics = check_es_cluster(instance=ESConfig.instance,
+                                   cluster=ESConfig.cluster)
 
+        for metric in metrics:
+            if metric.metric is None:
+                continue
 
-  def metric_to_val(m):
+            val = collectd.Values(plugin='elasticsearch', type=metric.type)
+            val.plugin_instance = ESConfig.instance
+            val.values = [float(metric.metric)]
+            val.type_instance = metric.name
+            val.dispatch()
 
-    if m.metric == None:
-      return None
-
-    val = collectd.Values(plugin=NAME, type=m.type)
-    val.plugin_instance = ESConfig.instance
-    val.values = [ float(m.metric) ]
-    val.type_instance = m.name
-    return val
-    
-  def read_callback():
-
-    metrics = check_es_cluster(instance=ESConfig.instance,
-                               cluster=ESConfig.cluster)
-
-    for metric in metrics:
-      val = metric_to_val(metric)
-      if val:
-        val.dispatch()
-
-  collectd.register_read(read_callback)
-  collectd.register_config(config_callback)
-
+    collectd.register_read(read_callback)
+    collectd.register_config(config_callback)
 except ImportError:
-  ## we're not running inside collectd
-  ## it's ok
-  pass
+    # we're not running inside collectd
+    # it's ok
+    pass
 
 if __name__ == "__main__":
-  cluster = os.getenv("ES_CLUSTER", 'http://localhost:9200')
-
-  metrics = check_es_cluster(cluster=cluster)
+    cluster = os.getenv("ES_CLUSTER", 'http://localhost:9200')
+    metrics = check_es_cluster(cluster=cluster)
