@@ -5,7 +5,7 @@ import requests
 
 def merge(one, two):
     cp = one.copy()
-    cp.udpate(two)
+    cp.update(two)
     return cp
 
 
