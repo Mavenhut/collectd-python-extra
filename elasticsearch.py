@@ -164,6 +164,9 @@ def check_es_cluster(instance="localhost", cluster='http://localhost:9200'):
     stats = json.loads(requests.get(stats_url).content)
     health = json.loads(requests.get(health_url).content)
 
+    [node_key] = stats['nodes'].keys()
+    stats = stats['nodes'][node_key]
+
     metrics = []
 
     for name, metric in health_metrics.items():
