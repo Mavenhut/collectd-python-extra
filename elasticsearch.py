@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 import os
 import requests
 
@@ -160,8 +161,8 @@ def check_es_cluster(instance="localhost", cluster='http://localhost:9200'):
                  'http,indices,process,transport,breaker').format(cluster)
     health_url = '{0}/_cluster/health'.format(cluster)
 
-    stats = requests.get(stats_url).json()
-    health = requests.get(health_url).json()
+    stats = json.loads(requests.get(stats_url).content)
+    health = json.loads(requests.get(health_url).content)
 
     metrics = []
 
