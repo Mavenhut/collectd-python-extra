@@ -48,7 +48,10 @@ def get_stats(nodes):
         query = session.execute('SELECT size FROM metastore.object')
 
         for i in query:
-            totalobjectsize = totalobjectsize + i.size
+            if i.size == None:
+                continue
+            else:
+                totalobjectsize = totalobjectsize + i.size
             nbobjects = nbobjects + 1
         
         totalobjectsize = totalobjectsize / 1073741824
