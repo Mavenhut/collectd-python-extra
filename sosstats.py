@@ -14,6 +14,7 @@ import time
 
 SLEEPTIME = 300
 
+
 def get_stats(nodes):
     if not (nodes):
         logger('error', "empty parameter, nodes: %s" % (nodes))
@@ -48,12 +49,12 @@ def get_stats(nodes):
         query = session.execute('SELECT size FROM metastore.object')
 
         for i in query:
-            if i.size == None:
+            if i.size is None:
                 continue
             else:
                 totalobjectsize = totalobjectsize + i.size
             nbobjects = nbobjects + 1
-        
+
         totalobjectsize = totalobjectsize / 1073741824
         stats = {}
         stats['totalobjectsize'] = totalobjectsize
@@ -61,7 +62,6 @@ def get_stats(nodes):
         stats['nbbuckets'] = nbbuckets
         stats['nbtenants'] = nbtenants
         return stats
-
 
     except ValueError as e:
         logger('error', "Error during cassandra query: %s" % e)
@@ -74,15 +74,14 @@ def get_stats(nodes):
         time.sleep(SLEEPTIME)
 
 
-
-
 NAME = "pithos-sos"
 VERBOSE_LOGGING = False
 
 nodes = ""
 
+
 def config_callback(conf):
-    global  nodes, VERBOSE_LOGGING
+    global nodes, VERBOSE_LOGGING
     for node in conf.children:
         logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
         if node.key == "nodes":
@@ -92,31 +91,32 @@ def config_callback(conf):
         else:
             logger('warn', "unknown config key in puppet module: %s" % node.key)
 
+
 def read_callback():
     sos_stats = get_stats(nodes)
     val = collectd.Values(plugin=NAME, type="gauge")
-    val.values = [sos_stats['totalobjectsize'] ]
+    val.values = [sos_stats['totalobjectsize']]
     logger('verb', "Total objects size %s" % sos_stats['totalobjectsize'])
     val.type_instance = "total-objects-sizeGB"
     val.type = "gauge"
     val.dispatch()
 
     val = collectd.Values(plugin=NAME, type="gauge")
-    val.values = [sos_stats['nbobjects'] ]
+    val.values = [sos_stats['nbobjects']]
     logger('verb', "Total nb objects %s" % sos_stats['nbobjects'])
     val.type_instance = "total-objects-nb"
     val.type = "gauge"
     val.dispatch()
 
     val = collectd.Values(plugin=NAME, type="gauge")
-    val.values = [sos_stats['nbbuckets'] ]
+    val.values = [sos_stats['nbbuckets']]
     logger('verb', "Total nb Buckets %s" % sos_stats['nbbuckets'])
     val.type_instance = "total-buckets-nb"
     val.type = "gauge"
     val.dispatch()
 
     val = collectd.Values(plugin=NAME, type="gauge")
-    val.values = [sos_stats['nbtenants'] ]
+    val.values = [sos_stats['nbtenants']]
     logger('verb', "Total nb Tenants %s" % sos_stats['nbtenants'])
     val.type_instance = "total-tenants-nb"
     val.type = "gauge"
@@ -137,4 +137,3 @@ def logger(t, msg):
 
 collectd.register_config(config_callback)
 collectd.register_read(read_callback)
-

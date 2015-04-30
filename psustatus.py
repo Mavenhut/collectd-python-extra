@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#Author: Loic Lambiel, exoscale
-#This is a collectd python script to get the PSU status using ipmi-sensors (freeipmi-tools package)
-
+# Author: Loic Lambiel, exoscale
+# This is a collectd python script to get the PSU status using ipmi-sensors (freeipmi-tools package)
 
 
 import collectd
@@ -14,14 +13,15 @@ SLEEPTIME = 120
 VERBOSE_LOGGING = False
 NAME = "ipmi.psu"
 
+
 def get_psustatus():
     psuStatus = {}
     logger('verb', "Performing ipmi-sensors query to get psu status")
-    
+
     try:
         p = Popen(["ipmi-sensors", "-t", "Power_Supply", "--no-header-output"], stdin=PIPE, stdout=PIPE, bufsize=1)
         logger('verb', "ipmitool query done")
-    except:
+    except Exception:
         logger('err', "Failed to query ipmi-sensors. Please ensure it is installed")
         raise
 
@@ -46,12 +46,11 @@ def get_psustatus():
                 psuState = 1
             else:
                 psuState = 0
-            
+
             psuStatus[str(psuItem)] = psuState
 
-    time.sleep(SLEEPTIME)        
+    time.sleep(SLEEPTIME)
     return psuStatus
-
 
 
 # logging function
@@ -74,13 +73,11 @@ def read_callback():
         for key, value in psu_status.items():
             val.values = [value]
             logger('verb', "psu %s status is: %s" % (key, value))
-            val.type_instance =  key
+            val.type_instance = key
             val.type = "gauge"
             val.dispatch()
     else:
         logger('verb', "no psu found")
 
 
-collectd.register_read(read_callback) 
-
-
+collectd.register_read(read_callback)
