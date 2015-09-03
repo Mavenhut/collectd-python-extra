@@ -17,6 +17,9 @@ import pypuppetdb
 import collectd
 
 from pypuppetdb import connect
+from pypuppetdb.errors import EmptyResponseError
+from requests.exceptions import HTTPError, ConnectionError
+
 
 # Host to connect to. Override in config by specifying 'Host'.
 PUPPETDB_HOST    = 'localhost'
