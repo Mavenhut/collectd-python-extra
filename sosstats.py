@@ -10,10 +10,8 @@ from __future__ import division
 from cassandra.cluster import Cluster
 import sys
 import collectd
-import time
 
-SLEEPTIME = 300
-
+RUN = 0
 
 def get_stats(nodes):
     if not (nodes):
@@ -70,29 +68,34 @@ def get_stats(nodes):
     finally:
         session.cluster.shutdown()
         session.shutdown()
-        logger('verb', "Entering sleeptime")
-        time.sleep(SLEEPTIME)
 
 
 NAME = "pithos-sos"
 VERBOSE_LOGGING = False
+SKIP = 10
 
 nodes = ""
 
 
 def config_callback(conf):
-    global nodes, VERBOSE_LOGGING
+    global nodes, VERBOSE_LOGGING, SKIP
     for node in conf.children:
         logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
         if node.key == "nodes":
             nodes = node.values[0]
         elif node.key == "Verbose":
             VERBOSE_LOGGING = bool(node.values[0])
+        elif node.key == "Skip":
+            SKIP = int(node.values[0])
         else:
             logger('warn', "unknown config key in puppet module: %s" % node.key)
 
 
 def read_callback():
+    global RUN, SKIP
+    RUN += 1
+    if RUN % SKIP != 1:
+        return
     sos_stats = get_stats(nodes)
     val = collectd.Values(plugin=NAME, type="gauge")
     val.values = [sos_stats['totalobjectsize']]

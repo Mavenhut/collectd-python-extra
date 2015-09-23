@@ -5,8 +5,8 @@
 
 import collectd
 from pysphere import VIServer
-import time        
 
+RUN = 0
 
 METRIC_TYPES = {
     'datastorecapacity': ('z_dscapacity', 'current'),
@@ -375,7 +375,6 @@ def get_stats():
        
 
         server.disconnect()
-    time.sleep(SLEEPTIME)
     return stats
 
 
@@ -383,13 +382,13 @@ def get_stats():
 # callback configuration for module
 def configure_callback(conf):
 
-  global NAME, SLEEPTIME, VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING
+  global NAME, VCENTERLIST, USERNAME, PASSWORD, VERBOSE_LOGGING, SKIP
   NAME = 'Vcenter'
-  SLEEPTIME = 300
   VCENTERLIST = ''
   USERNAME = ''
   PASSWORD = ''
   VERBOSE_LOGGING = False
+  SKIP = 10
 
   for node in conf.children:
     if node.key == "Vcenter":
@@ -400,11 +399,17 @@ def configure_callback(conf):
       PASSWORD = node.values[0]
     elif node.key == "Verbose":
       VERBOSE_LOGGING = bool(node.values[0])
+    elif node.key == "Skip":
+      SKIP = int(node.values[0])
     else:
       logger('warn', 'Unknown config key: %s' % node.key)
 
 
 def read_callback():
+  global RUN, SKIP
+  RUN += 1
+  if RUN % SKIP != 1:
+    return
   logger('verb', "beginning read_callback")
   info = get_stats()
 

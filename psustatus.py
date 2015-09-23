@@ -5,13 +5,12 @@
 
 
 import collectd
-import time
 from subprocess import PIPE, Popen
-global SLEEPTIME
 
-SLEEPTIME = 120
 VERBOSE_LOGGING = False
 NAME = "ipmi.psu"
+SKIP = 10
+RUN = 0
 
 
 def get_psustatus():
@@ -49,7 +48,6 @@ def get_psustatus():
 
             psuStatus[str(psuItem)] = psuState
 
-    time.sleep(SLEEPTIME)
     return psuStatus
 
 
@@ -67,6 +65,10 @@ def logger(t, msg):
 
 
 def read_callback():
+    global RUN, SKIP
+    RUN += 1
+    if RUN % SKIP != 1:
+        return
     psu_status = get_psustatus()
     val = collectd.Values(plugin=NAME, type="gauge")
     if psu_status:

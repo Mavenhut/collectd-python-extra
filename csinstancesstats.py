@@ -8,10 +8,8 @@
 
 import MySQLdb
 import sys
-import time
 
-SLEEPTIME = 300
-
+RUN = 0
 
 def get_nb_instances(dbhost, user, pwd, database):
     if not (dbhost and user and pwd and database):
@@ -34,7 +32,6 @@ def get_nb_instances(dbhost, user, pwd, database):
     finally:
         if con:
             con.close()
-            time.sleep(SLEEPTIME)
 
 
 try:
@@ -42,6 +39,7 @@ try:
 
     NAME = "cloudstack"
     VERBOSE_LOGGING = False
+    SKIP = 10
 
     dbhost = ""
     user = ""
@@ -49,7 +47,7 @@ try:
     database = ""
 
     def config_callback(conf):
-        global dbhost, user, pwd, database, VERBOSE_LOGGING
+        global dbhost, user, pwd, database, VERBOSE_LOGGING, SKIP
         for node in conf.children:
             logger('verb', "Node key: %s and value %s" % (node.key, node.values[0]))
             if node.key == "DbHost":
@@ -62,10 +60,16 @@ try:
                 database = node.values[0]
             elif node.key == "Verbose":
                 VERBOSE_LOGGING = bool(node.values[0])
+            elif node.key == "Skip":
+                SKIP = int(node.values[0])
             else:
                 logger('warn', "unknown config key in puppet module: %s" % node.key)
 
     def read_callback():
+        global RUN, SKIP
+        RUN += 1
+        if RUN % SKIP != 1:
+            return
         cs_stats = get_nb_instances(dbhost, user, pwd, database)
         val = collectd.Values(plugin=NAME, type="gauge")
         val.values = [cs_stats['nbinstances']]
