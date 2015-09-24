@@ -505,7 +505,7 @@ def get_stats():
         accounts = all_accounts
         logger('verb', "Completed listAccounts API call")
     except Exception:
-        print("status err Unable to connect to CloudStack URL at %s for ListAccounts")
+        logger('err', "status err Unable to connect to CloudStack URL at %s for ListAccounts")
 
     metricnameAccountsTotal = METRIC_DELIM.join(['accounts',  'accountscount'])
     metricnameAccountsTotalEnabled = METRIC_DELIM.join(['accounts',  'accountenabled'])
@@ -527,7 +527,7 @@ def get_stats():
     try:
         capacity = cloudstack.listCapacity()
     except Exception:
-        print("status err Unable to connect to CloudStack URL at %s for ListCapacity")
+        logger('err', "status err Unable to connect to CloudStack URL at %s for ListCapacity")
 
     for c in capacity['capacity']:
         if c['type'] == 0:
