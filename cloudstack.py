@@ -324,7 +324,7 @@ def get_stats():
     except Exception:
         logger('err', "status err Unable to connect to CloudStack URL at %s for ListCapacity")
 
-    for c in capacity['capacity']:
+    for c in capacity:
         if c['type'] == 0:
             metricnameCapaZoneMemoryTotal = METRIC_DELIM.join(['zonecapacity', c['zonename'].lower(),  'zonecapamemorytotal'])
             metricnameCapaZoneMemoryUsed = METRIC_DELIM.join(['zonecapacity', c['zonename'].lower(),  'zonecapamemoryused'])
