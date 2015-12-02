@@ -30,18 +30,14 @@ def get_psustatus():
             i = i + 1
             matchedline = lines.split("|")
             psuItem = "ps%s_status" % i
-            psustatus = matchedline[5]
-            if "Predictive Failure" in psustatus:
+            psustatus = matchedline[5].lower()
+            if "failure" in psustatus:
                 psuState = 1
-            elif "Power Supply input lost (AC/DC)" in psustatus:
+            elif "lost" in psustatus:
                 psuState = 1
-            elif "Power Supply input lost or out-of-range" in psustatus:
+            elif "out-of-range" in psustatus:
                 psuState = 1
-            elif "Power Supply input out-of-range, but present" in psustatus:
-                psuState = 1
-            elif "Configuration error" in psustatus:
-                psuState = 1
-            elif "Failure" in psustatus:
+            elif "error" in psustatus:
                 psuState = 1
             else:
                 psuState = 0
