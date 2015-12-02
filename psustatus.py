@@ -41,7 +41,7 @@ def get_psustatus():
                 psuState = 1
             elif "Configuration error" in psustatus:
                 psuState = 1
-            elif "OK" in psustatus:
+            elif "Failure" in psustatus:
                 psuState = 1
             else:
                 psuState = 0
