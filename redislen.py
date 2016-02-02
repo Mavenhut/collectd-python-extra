@@ -9,7 +9,7 @@ def check_redis_length(queue_name, port=6379):
 
 class RedisLengthConfig:
   def __init__(self):
-    self.queue_name = "logstash"
+    self.queues = []
     self.port = 6379
 
 config = RedisLengthConfig()
@@ -34,21 +34,22 @@ try:
   def config_callback(conf):
     for node in conf.children:
       if node.key == 'QueueName':
-        config.queue_name = node.values[0]
+        for v in node.values:
+          config.queues.append(v)
       elif node.key == 'Port':
         config.port = int(node.values[0])
       else:
         logger('info', "unknown config key in puppet module: %s" % node.key)
 
   def read_callback():
+    for v in config.queues:
+      queue_len = check_redis_length(v,port=config.port)
 
-    queue_len = check_redis_length(config.queue_name,
-                                   port=config.port)
-    val = collectd.Values(plugin=NAME, type="gauge")
-    val.plugin_instance = config.queue_name
-    val.values = [ float(queue_len) ]
-    val.type = "gauge"
-    val.dispatch()
+      val = collectd.Values(plugin=NAME, type="gauge")
+      val.plugin_instance = v
+      val.values = [ float(queue_len) ]
+      val.type = "gauge"
+      val.dispatch()
 
   collectd.register_config(config_callback)
   collectd.register_read(read_callback)
